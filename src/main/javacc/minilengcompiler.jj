@@ -1,0 +1,300 @@
+options
+{
+  static = false;
+  ignore_case = true;
+  common_token_action = false;
+}
+
+PARSER_BEGIN(MiniLeng)
+package com.minileng.generated;
+
+import com.minileng.collections.TokenFreq;
+
+public class MiniLeng {
+}
+
+PARSER_END(MiniLeng)
+
+TOKEN_MGR_DECLS :
+{
+  private TokenFreq tokenFreq = new TokenFreq();
+
+  public TokenFreq getTokenFreq() {
+    return tokenFreq;
+  }
+}
+
+SKIP :
+{
+  " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | "\r\n"
+  | < "%"(~["\n","\r"])*("\n" | "\r" | "\r\n") >
+}
+
+// Data types
+TOKEN :
+{
+  < tENTERO : "entero" >
+    {
+      tokenFreq.addOrInc("tENTERO");
+    }
+  | < tBOOLEANO : "booleano" >
+    {
+      tokenFreq.addOrInc("tBOOLEANO");
+    }
+  | < tCARACTER : "caracter" >
+    {
+      tokenFreq.addOrInc("tCARACTER");
+    }
+}
+
+// Arithmetic operators
+TOKEN :
+{
+  < tMAS : "+" >
+    {
+      tokenFreq.addOrInc("tMAS");
+    }
+  | < tMENOS : "-" >
+    {
+      tokenFreq.addOrInc("tMENOS");
+    }
+  | < tMUL : "*" >
+    {
+      tokenFreq.addOrInc("tMUL");
+    }
+  | < tDIVCHAR : "/" >
+    {
+      tokenFreq.addOrInc("tDIVCHAR");
+    }
+  | < tDIV : "div" >
+    {
+      tokenFreq.addOrInc("tDIV");
+    }
+  | < tMOD : "mod" >
+    {
+      tokenFreq.addOrInc("tMOD");
+    }
+}
+
+// Asignment operators
+TOKEN :
+{
+  < tOPAS : ":=" >
+    {
+      tokenFreq.addOrInc("tOPAS");
+    }
+}
+
+// Relational operators
+TOKEN :
+{
+  < tMAYOR : ">" >
+    {
+      tokenFreq.addOrInc("tMAYOR");
+    }
+  | < tMENOR : "<" >
+    {
+      tokenFreq.addOrInc("tMENOR");
+    }
+  | < tIGUAL : "=" >
+    {
+      tokenFreq.addOrInc("tIGUAL");
+    }
+  | < tMAI : ">=" >
+    {
+      tokenFreq.addOrInc("tMAI");
+    }
+  | < tMEI : "<=" >
+    {
+      tokenFreq.addOrInc("tMEI");
+    }
+  | < tNI : "<>" >
+    {
+      tokenFreq.addOrInc("tNI");
+    }
+}
+
+// Logical operators
+TOKEN :
+{
+  < tAND : "and" >
+    {
+      tokenFreq.addOrInc("tAND");
+    }
+  | < tOR : "or" >
+    {
+      tokenFreq.addOrInc("tOR");
+    }
+  | < tNOT : "not" >
+    {
+      tokenFreq.addOrInc("tNOT");
+    }
+}
+
+// Casting operators
+TOKEN :
+{
+  < tENTACAR : "entacar" >
+    {
+      tokenFreq.addOrInc("tENTACAR");
+    }
+  | < tCARAENT : "caraent" >
+    {
+      tokenFreq.addOrInc("tCARAENT");
+    }
+}
+
+// Conditional structures
+TOKEN :
+{
+  < tSI : "si" >
+    {
+      tokenFreq.addOrInc("tSI");
+    }
+  | < tENT : "ent" >
+    {
+      tokenFreq.addOrInc("tENT");
+    }
+  | < tSI_NO : "si_no" >
+    {
+      tokenFreq.addOrInc("tSI");
+    }
+  | < tFSI : "fsi" >
+    {
+      tokenFreq.addOrInc("tFSI");
+    }
+  | < tMQ : "mq" >
+    {
+      tokenFreq.addOrInc("tMQ");
+    }
+  | < tFMQ : "fmq" >
+    {
+      tokenFreq.addOrInc("tFMQ");
+    }
+}
+
+// IO
+TOKEN :
+{
+  < tESCRIBIR : "escribir" >
+    {
+      tokenFreq.addOrInc("tESCRIBIR");
+    }
+  | < tLEER : "leer" >
+    {
+      tokenFreq.addOrInc("tLEER");
+    }
+}
+
+// Procedure related tokens
+TOKEN :
+{
+  < tVAL : "val" >
+    {
+      tokenFreq.addOrInc("tVAL");
+    }
+  | < tREF : "ref" >
+    {
+      tokenFreq.addOrInc("tREF");
+    }
+  | < tACCION : "accion" >
+    {
+      tokenFreq.addOrInc("tACCION");
+    }
+  | < tPRINCIPIO : "principio" >
+    {
+      tokenFreq.addOrInc("tPRINCIPIO");
+    }
+  | < tFIN : "fin" >
+    {
+      tokenFreq.addOrInc("tFIN");
+    }
+}
+
+// Constants
+TOKEN :
+{
+  < tTRUE : "true" >
+    {
+      tokenFreq.addOrInc("tTRUE");
+    }
+  | < tFALSE : "false" >
+    {
+      tokenFreq.addOrInc("tFALSE");
+    }
+  | < tKENTERO : (["0"-"9"])+ >
+    {
+      tokenFreq.addOrInc("tKENTERO");
+    }
+  | < tKCARACTER: "\"""\"" >
+    {
+      tokenFreq.addOrInc("tKCARACTER");
+    }
+  | < tKCADENA: "\""(~["\n","\r"])*"\"" >
+    {
+      tokenFreq.addOrInc("tKCADENA");
+    }
+  | < tPUNTOCOMA : ";" >
+    {
+      tokenFreq.addOrInc("tPUNTOCOMA");
+    }
+  | < tCOMA : "," >
+    {
+      tokenFreq.addOrInc("tCOMA");
+    }
+  | < tPAR_DCHA : ")" >
+    {
+      tokenFreq.addOrInc("tPAR_DCHA");
+    }
+  | < tPAR_IZQ : "(" >
+    {
+      tokenFreq.addOrInc("tPAR_IZQ");
+    }
+}
+
+// Program
+TOKEN :
+{
+  < tPROGRAMA : "programa" >
+    {
+      tokenFreq.addOrInc("tPROGRAMA");
+    }
+  | < tID : (["a"-"z"]) | (["a"-"z","_"](["a"-"z","0"-"9","_"])*(["a"-"z","0"-"9"])+) >
+    {
+      tokenFreq.addOrInc("tID");
+    }
+}
+
+
+void programa() :
+{
+}
+  
+{
+  < tPROGRAMA > <tID> <tPUNTOCOMA> rest()
+}
+
+void rest() :
+{
+}
+
+{
+  tokens() rest() | <EOF>
+}
+
+void tokens() :
+{
+}
+
+{
+  < tID > | < tPROGRAMA > | < tPAR_IZQ > | < tPAR_DCHA > | < tCOMA > | < tPUNTOCOMA > | < tKCADENA > | < tKCARACTER > |
+  < tKENTERO > | < tFALSE > | < tTRUE > | < tFIN > | < tPRINCIPIO > | < tACCION > | < tREF > |
+  < tVAL > | < tLEER > | < tESCRIBIR > | < tFMQ > | < tMQ > | < tFSI > | < tSI_NO > | < tENT > |
+  < tSI > | < tCARAENT > | < tENTACAR > | < tNOT > | < tOR > | < tAND > | < tNI > | < tMEI > |
+  < tMAI > | < tIGUAL > | < tMENOR > | < tMAYOR > | < tOPAS > | < tMOD > | < tDIV > | < tDIVCHAR > |
+  < tMUL > | < tMENOS > | < tMAS > | < tCARACTER > | < tBOOLEANO > | < tENTERO >
+}
