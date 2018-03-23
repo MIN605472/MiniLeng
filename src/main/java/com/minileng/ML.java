@@ -4,6 +4,7 @@ import com.minileng.arguments.ArgParserException;
 import com.minileng.arguments.Args;
 import com.minileng.arguments.ArgsParser;
 import com.minileng.generated.MiniLeng;
+import com.minileng.generated.MiniLengTokenManager;
 import com.minileng.generated.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -20,10 +21,10 @@ public class ML {
       Args parsedArgs = ArgsParser.parse(args);
       String file = parsedArgs.getArg("file", String.class);
       MiniLeng parser = new MiniLeng(new FileReader(file));
-      parser.programa();
+      MiniLeng.programa();
       if (!Objects.isNull(parsedArgs.getArg("-v", Boolean.class))) {
         LOG.info("Tabla de frecuencia de tokens:\n{}",
-            parser.token_source.getTokenFreq().toString());
+            MiniLengTokenManager.getTokenFreq().toString());
       }
     } catch (FileNotFoundException e) {
       LOG.error("No se puede encontrar el fichero especificado.");

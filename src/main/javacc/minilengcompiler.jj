@@ -1,6 +1,6 @@
 options
 {
-  static = false;
+  static = true;
   ignore_case = true;
   common_token_action = false;
 }
@@ -17,9 +17,9 @@ PARSER_END(MiniLeng)
 
 TOKEN_MGR_DECLS :
 {
-  private TokenFreq tokenFreq = new TokenFreq();
+  private static TokenFreq tokenFreq = new TokenFreq();
 
-  public TokenFreq getTokenFreq() {
+  public static TokenFreq getTokenFreq() {
     return tokenFreq;
   }
 }
@@ -31,7 +31,7 @@ SKIP :
   | "\n"
   | "\r"
   | "\r\n"
-  | < "%"(~["\n","\r"])*("\n" | "\r" | "\r\n") >
+  | < tCOMENTARIO: "%"(~["\n","\r"])*("\n"|"\r"|"\r\n") >
 }
 
 // Data types
@@ -161,7 +161,7 @@ TOKEN :
     }
   | < tSI_NO : "si_no" >
     {
-      tokenFreq.addOrInc("tSI");
+      tokenFreq.addOrInc("tSI_NO");
     }
   | < tFSI : "fsi" >
     {
@@ -230,11 +230,11 @@ TOKEN :
     {
       tokenFreq.addOrInc("tKENTERO");
     }
-  | < tKCARACTER: "\"""\"" >
+  | < tKCARACTER: "\""(~["\n","\r"])"\"" >
     {
       tokenFreq.addOrInc("tKCARACTER");
     }
-  | < tKCADENA: "\""(~["\n","\r"])*"\"" >
+  | < tKCADENA: "\""(~["\n","\r","\""])(~["\n","\r","\""])+"\"" >
     {
       tokenFreq.addOrInc("tKCADENA");
     }

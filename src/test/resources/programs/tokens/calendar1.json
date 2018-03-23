@@ -1,0 +1,2179 @@
+{
+  "tokens": [
+    {
+      "line": 2,
+      "token": "tPROGRAMA",
+      "image": "PROGRAMA"
+    },
+    {
+      "line": 2,
+      "token": "tID",
+      "image": "calendario"
+    },
+    {
+      "line": 2,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 8,
+      "token": "tENTERO",
+      "image": "entero"
+    },
+    {
+      "line": 8,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 8,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 8,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 8,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 8,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 8,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 8,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 8,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 8,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 8,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 9,
+      "token": "tCARACTER",
+      "image": "caracter"
+    },
+    {
+      "line": 9,
+      "token": "tID",
+      "image": "ln"
+    },
+    {
+      "line": 9,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 12,
+      "token": "tACCION",
+      "image": "ACCION"
+    },
+    {
+      "line": 12,
+      "token": "tID",
+      "image": "primer_dia_anho"
+    },
+    {
+      "line": 12,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 18,
+      "token": "tENTERO",
+      "image": "entero"
+    },
+    {
+      "line": 18,
+      "token": "tID",
+      "image": "bisiestos"
+    },
+    {
+      "line": 18,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 19,
+      "token": "tBOOLEANO",
+      "image": "booleano"
+    },
+    {
+      "line": 19,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 19,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 19,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 19,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 19,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 19,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 24,
+      "token": "tPRINCIPIO",
+      "image": "principio"
+    },
+    {
+      "line": 25,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 25,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 25,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 25,
+      "token": "tMENOS",
+      "image": "-"
+    },
+    {
+      "line": 25,
+      "token": "tKENTERO",
+      "image": "1900"
+    },
+    {
+      "line": 25,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 26,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 26,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 26,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 26,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 26,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 26,
+      "token": "tKENTERO",
+      "image": "4"
+    },
+    {
+      "line": 26,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 26,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 26,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 26,
+      "token": "tAND",
+      "image": "AND"
+    },
+    {
+      "line": 26,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 26,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 26,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 26,
+      "token": "tKENTERO",
+      "image": "100"
+    },
+    {
+      "line": 26,
+      "token": "tNI",
+      "image": "<>"
+    },
+    {
+      "line": 26,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 26,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 26,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 27,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 27,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 27,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 27,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 27,
+      "token": "tKENTERO",
+      "image": "400"
+    },
+    {
+      "line": 27,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 27,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 27,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 28,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 28,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 28,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 28,
+      "token": "tOR",
+      "image": "OR"
+    },
+    {
+      "line": 28,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 28,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 29,
+      "token": "tID",
+      "image": "bisiestos"
+    },
+    {
+      "line": 29,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 29,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 29,
+      "token": "tDIV",
+      "image": "DIV"
+    },
+    {
+      "line": 29,
+      "token": "tKENTERO",
+      "image": "4"
+    },
+    {
+      "line": 29,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 30,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 30,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 31,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 31,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 31,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 31,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 31,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 31,
+      "token": "tMENOS",
+      "image": "-"
+    },
+    {
+      "line": 31,
+      "token": "tKENTERO",
+      "image": "1"
+    },
+    {
+      "line": 31,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 31,
+      "token": "tID",
+      "image": "bisiestos"
+    },
+    {
+      "line": 31,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 31,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 31,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 31,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 32,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 32,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 32,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 32,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 32,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 32,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 32,
+      "token": "tID",
+      "image": "bisiestos"
+    },
+    {
+      "line": 32,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 32,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 32,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 32,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 33,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 34,
+      "token": "tFIN",
+      "image": "fin"
+    },
+    {
+      "line": 37,
+      "token": "tACCION",
+      "image": "ACCION"
+    },
+    {
+      "line": 37,
+      "token": "tID",
+      "image": "primer_dia_mes"
+    },
+    {
+      "line": 37,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "el"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "dia"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "uno"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "d"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "ese"
+    },
+    {
+      "line": 40,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 44,
+      "token": "tBOOLEANO",
+      "image": "booleano"
+    },
+    {
+      "line": 44,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 44,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 44,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 44,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 44,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 44,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 46,
+      "token": "tPRINCIPIO",
+      "image": "principio"
+    },
+    {
+      "line": 47,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 47,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 47,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 47,
+      "token": "tMENOS",
+      "image": "-"
+    },
+    {
+      "line": 47,
+      "token": "tKENTERO",
+      "image": "1900"
+    },
+    {
+      "line": 47,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 48,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 48,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 48,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 48,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 48,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 48,
+      "token": "tKENTERO",
+      "image": "4"
+    },
+    {
+      "line": 48,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 48,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 48,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 48,
+      "token": "tAND",
+      "image": "AND"
+    },
+    {
+      "line": 48,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 48,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 48,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 48,
+      "token": "tKENTERO",
+      "image": "100"
+    },
+    {
+      "line": 48,
+      "token": "tNI",
+      "image": "<>"
+    },
+    {
+      "line": 48,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 48,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 48,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 49,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 49,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 49,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 49,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 49,
+      "token": "tKENTERO",
+      "image": "400"
+    },
+    {
+      "line": 49,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 49,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 49,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 50,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 50,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 50,
+      "token": "tID",
+      "image": "cien"
+    },
+    {
+      "line": 50,
+      "token": "tOR",
+      "image": "OR"
+    },
+    {
+      "line": 50,
+      "token": "tID",
+      "image": "cuatro"
+    },
+    {
+      "line": 50,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 51,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 51,
+      "token": "tID",
+      "image": "bisiestos_validos"
+    },
+    {
+      "line": 52,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 52,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 52,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 52,
+      "token": "tKENTERO",
+      "image": "1"
+    },
+    {
+      "line": 52,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 53,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 53,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 53,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 53,
+      "token": "tKENTERO",
+      "image": "0"
+    },
+    {
+      "line": 53,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 54,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 55,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 55,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 55,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 55,
+      "token": "tKENTERO",
+      "image": "1"
+    },
+    {
+      "line": 55,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 55,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 55,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 55,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 55,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 56,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 57,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 57,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 57,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 57,
+      "token": "tKENTERO",
+      "image": "2"
+    },
+    {
+      "line": 57,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 57,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 57,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 57,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 57,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 57,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 57,
+      "token": "tKENTERO",
+      "image": "31"
+    },
+    {
+      "line": 57,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 57,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 57,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 57,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 58,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 59,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 59,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 59,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 59,
+      "token": "tKENTERO",
+      "image": "3"
+    },
+    {
+      "line": 59,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 59,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 59,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 59,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 59,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 59,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 59,
+      "token": "tKENTERO",
+      "image": "59"
+    },
+    {
+      "line": 59,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 59,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 59,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 59,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 59,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 59,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 60,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 61,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 61,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 61,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 61,
+      "token": "tKENTERO",
+      "image": "4"
+    },
+    {
+      "line": 61,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 61,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 61,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 61,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 61,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 61,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 61,
+      "token": "tKENTERO",
+      "image": "90"
+    },
+    {
+      "line": 61,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 61,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 61,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 61,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 61,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 61,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 62,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 63,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 63,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 63,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 63,
+      "token": "tKENTERO",
+      "image": "5"
+    },
+    {
+      "line": 63,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 63,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 63,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 63,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 63,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 63,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 63,
+      "token": "tKENTERO",
+      "image": "120"
+    },
+    {
+      "line": 63,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 63,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 63,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 63,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 63,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 63,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 64,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 65,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 65,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 65,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 65,
+      "token": "tKENTERO",
+      "image": "6"
+    },
+    {
+      "line": 65,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 65,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 65,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 65,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 65,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 65,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 65,
+      "token": "tKENTERO",
+      "image": "151"
+    },
+    {
+      "line": 65,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 65,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 65,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 65,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 65,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 65,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 66,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 67,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 67,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 67,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 67,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 67,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 67,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 67,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 67,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 67,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 67,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 67,
+      "token": "tKENTERO",
+      "image": "181"
+    },
+    {
+      "line": 67,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 67,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 67,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 67,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 67,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 67,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 68,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 69,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 69,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 69,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 69,
+      "token": "tKENTERO",
+      "image": "8"
+    },
+    {
+      "line": 69,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 69,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 69,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 69,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 69,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 69,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 69,
+      "token": "tKENTERO",
+      "image": "212"
+    },
+    {
+      "line": 69,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 69,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 69,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 69,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 69,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 69,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 70,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 71,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 71,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 71,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 71,
+      "token": "tKENTERO",
+      "image": "9"
+    },
+    {
+      "line": 71,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 71,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 71,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 71,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 71,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 71,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 71,
+      "token": "tKENTERO",
+      "image": "243"
+    },
+    {
+      "line": 71,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 71,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 71,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 71,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 71,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 71,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 72,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 73,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 73,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 73,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 73,
+      "token": "tKENTERO",
+      "image": "10"
+    },
+    {
+      "line": 73,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 73,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 73,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 73,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 73,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 73,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 73,
+      "token": "tKENTERO",
+      "image": "273"
+    },
+    {
+      "line": 73,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 73,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 73,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 73,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 73,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 73,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 74,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 75,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 75,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 75,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 75,
+      "token": "tKENTERO",
+      "image": "11"
+    },
+    {
+      "line": 75,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 75,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 75,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 75,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 75,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 75,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 75,
+      "token": "tKENTERO",
+      "image": "304"
+    },
+    {
+      "line": 75,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 75,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 75,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 75,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 75,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 75,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 76,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 77,
+      "token": "tSI",
+      "image": "si"
+    },
+    {
+      "line": 77,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 77,
+      "token": "tIGUAL",
+      "image": "="
+    },
+    {
+      "line": 77,
+      "token": "tKENTERO",
+      "image": "12"
+    },
+    {
+      "line": 77,
+      "token": "tENT",
+      "image": "ent"
+    },
+    {
+      "line": 77,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 77,
+      "token": "tOPAS",
+      "image": ":="
+    },
+    {
+      "line": 77,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 77,
+      "token": "tID",
+      "image": "dia1anho"
+    },
+    {
+      "line": 77,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 77,
+      "token": "tKENTERO",
+      "image": "334"
+    },
+    {
+      "line": 77,
+      "token": "tMAS",
+      "image": "+"
+    },
+    {
+      "line": 77,
+      "token": "tID",
+      "image": "anhade"
+    },
+    {
+      "line": 77,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 77,
+      "token": "tMOD",
+      "image": "MOD"
+    },
+    {
+      "line": 77,
+      "token": "tKENTERO",
+      "image": "7"
+    },
+    {
+      "line": 77,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 78,
+      "token": "tSI_NO",
+      "image": "si_no"
+    },
+    {
+      "line": 79,
+      "token": "tESCRIBIR",
+      "image": "escribir"
+    },
+    {
+      "line": 79,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 79,
+      "token": "tKCADENA",
+      "image": "\"Has introducido el mes mal\""
+    },
+    {
+      "line": 79,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 79,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 80,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 81,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 82,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 83,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 84,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 85,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 86,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 87,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 88,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 89,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 90,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 91,
+      "token": "tFSI",
+      "image": "fsi"
+    },
+    {
+      "line": 93,
+      "token": "tFIN",
+      "image": "fin"
+    },
+    {
+      "line": 100,
+      "token": "tPRINCIPIO",
+      "image": "PRINCIPIO"
+    },
+    {
+      "line": 102,
+      "token": "tESCRIBIR",
+      "image": "escribir"
+    },
+    {
+      "line": 102,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 102,
+      "token": "tKCADENA",
+      "image": "\"CALENDARIO\""
+    },
+    {
+      "line": 102,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 102,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 103,
+      "token": "tESCRIBIR",
+      "image": "escribir"
+    },
+    {
+      "line": 103,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 103,
+      "token": "tKCADENA",
+      "image": "\"Introduce un mes en cifras:\""
+    },
+    {
+      "line": 103,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 103,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 104,
+      "token": "tLEER",
+      "image": "leer"
+    },
+    {
+      "line": 104,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 104,
+      "token": "tID",
+      "image": "mes"
+    },
+    {
+      "line": 104,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 104,
+      "token": "tID",
+      "image": "ln"
+    },
+    {
+      "line": 104,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 104,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 105,
+      "token": "tESCRIBIR",
+      "image": "escribir"
+    },
+    {
+      "line": 105,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 105,
+      "token": "tKCADENA",
+      "image": "\"Introduce un anio en cifras:\""
+    },
+    {
+      "line": 105,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 105,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 106,
+      "token": "tLEER",
+      "image": "leer"
+    },
+    {
+      "line": 106,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 106,
+      "token": "tID",
+      "image": "anho"
+    },
+    {
+      "line": 106,
+      "token": "tCOMA",
+      "image": ","
+    },
+    {
+      "line": 106,
+      "token": "tID",
+      "image": "ln"
+    },
+    {
+      "line": 106,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 106,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 107,
+      "token": "tID",
+      "image": "primer_dia_anho"
+    },
+    {
+      "line": 107,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 108,
+      "token": "tID",
+      "image": "primer_dia_mes"
+    },
+    {
+      "line": 108,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 109,
+      "token": "tESCRIBIR",
+      "image": "escribir"
+    },
+    {
+      "line": 109,
+      "token": "tPAR_IZQ",
+      "image": "("
+    },
+    {
+      "line": 109,
+      "token": "tID",
+      "image": "dia1mes"
+    },
+    {
+      "line": 109,
+      "token": "tPAR_DCHA",
+      "image": ")"
+    },
+    {
+      "line": 109,
+      "token": "tPUNTOCOMA",
+      "image": ";"
+    },
+    {
+      "line": 111,
+      "token": "tFIN",
+      "image": "FIN"
+    }
+  ]
+}
