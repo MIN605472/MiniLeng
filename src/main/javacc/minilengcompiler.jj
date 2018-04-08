@@ -3,6 +3,7 @@ options
   static = true;
   ignore_case = true;
   common_token_action = false;
+  debug_parser = false;
 }
 
 PARSER_BEGIN(MiniLeng)
@@ -269,32 +270,442 @@ TOKEN :
     }
 }
 
-
 void programa() :
 {
 }
-  
-{
-  < tPROGRAMA > <tID> <tPUNTOCOMA> rest()
-}
-
-void rest() :
-{
-}
 
 {
-  tokens() rest() | <EOF>
+  <tPROGRAMA> <tID> <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
 }
 
-void tokens() :
+void declaracion_variables() :
 {
 }
 
 {
-  < tID > | < tPROGRAMA > | < tPAR_IZQ > | < tPAR_DCHA > | < tCOMA > | < tPUNTOCOMA > | < tKCADENA > | < tKCARACTER > |
-  < tKENTERO > | < tFALSE > | < tTRUE > | < tFIN > | < tPRINCIPIO > | < tACCION > | < tREF > |
-  < tVAL > | < tLEER > | < tESCRIBIR > | < tFMQ > | < tMQ > | < tFSI > | < tSI_NO > | < tENT > |
-  < tSI > | < tCARAENT > | < tENTACAR > | < tNOT > | < tOR > | < tAND > | < tNI > | < tMEI > |
-  < tMAI > | < tIGUAL > | < tMENOR > | < tMAYOR > | < tOPAS > | < tMOD > | < tDIV > | < tDIVCHAR > |
-  < tMUL > | < tMENOS > | < tMAS > | < tCARACTER > | < tBOOLEANO > | < tENTERO >
+  declaracion() <tPUNTOCOMA> declaracion_variables() | {}
+}
+
+void declaracion() :
+{
+}
+
+{
+  tipo_variables() identificadores()
+}
+
+void tipo_variables() :
+{
+}
+
+{
+  <tENTERO> | <tCARACTER> | <tBOOLEANO>
+}
+
+void identificadores() :
+{
+}
+
+{
+  <tID> repeticion_identificadores()
+}
+
+void repeticion_identificadores() :
+{
+}
+
+{
+  <tCOMA> <tID> repeticion_identificadores() | {}
+}
+
+void declaracion_acciones() :
+{
+}
+
+{
+  declaracion_accion() declaracion_acciones() | {}
+}
+
+void declaracion_accion() :
+{
+}
+
+{
+  cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+}
+
+void cabecera_accion() :
+{
+}
+
+{
+  <tACCION> <tID> parametros_formales()
+}
+
+void parametros_formales() :
+{
+}
+
+{
+  <tPAR_IZQ> lista_parametros() <tPAR_DCHA> | {}
+}
+
+void lista_parametros() :
+{
+}
+
+{
+  parametro() repeticion_parametro() | {}
+}
+
+void parametro() :
+{
+}
+
+{
+  clase_parametros() tipo_variables() identificadores()
+}
+
+void repeticion_parametro() :
+{
+}
+
+{
+  <tPUNTOCOMA> parametro() repeticion_parametro() | {}
+}
+
+void clase_parametros() :
+{
+}
+
+{
+  <tVAL> | <tREF>
+}
+
+void bloque_sentencias() :
+{
+}
+
+{
+  <tPRINCIPIO> lista_sentencias() <tFIN>
+}
+
+void lista_sentencias() :
+{
+}
+
+{
+  sentencia() lista_sentencias() | {}
+}
+
+void sentencia() :
+{
+}
+
+{
+  leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+}
+
+void leer() :
+{
+}
+
+{
+  <tLEER> <tPAR_IZQ> identificadores() <tPAR_DCHA>
+}
+
+void escribir() :
+{
+}
+
+{
+  <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+}
+
+void asignacion_invocacion() :
+{
+}
+
+{
+  <tID> asignacion_invocacion_()
+}
+
+void asignacion_invocacion_() :
+{
+}
+
+{
+  asignacion() | invocacion_accion()
+}
+
+void asignacion() :
+{
+}
+
+{
+  <tOPAS> argumento() <tPUNTOCOMA>
+}
+
+void invocacion_accion() :
+{
+}
+
+{
+  argumentos_accion() <tPUNTOCOMA>
+}
+
+void mientras_que() :
+{
+}
+
+{
+  <tMQ> expresion_bool() lista_sentencias() <tFMQ>
+}
+
+void seleccion() :
+{
+}
+
+{
+  <tSI> seleccion_()
+}
+
+void argumentos_accion() :
+{
+}
+
+{
+  <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
+}
+
+void argumento() :
+{
+}
+
+{
+  <tKCADENA> | entacar() | expresion_bool()
+}
+
+void lista_argumentos_vacia() :
+{
+}
+
+{
+  <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+}
+
+void lista_argumentos_no_vacia() :
+{
+}
+
+{
+  <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+}
+
+void repeticion_argumentos() :
+{
+}
+
+{
+  <tCOMA> argumento() repeticion_argumentos() | {}
+}
+
+void operador_relacional() :
+{
+}
+
+{
+  <tMAYOR> | <tMENOR> | <tIGUAL> | <tMAI> | <tMEI> | <tNI>
+}
+
+void caraent() :
+{
+}
+
+{
+  <tCARAENT> caraent_()
+}
+
+void entacar() :
+{
+}
+
+{
+  <tENTACAR> <tPAR_IZQ> expresion_bool() <tPAR_DCHA>
+}
+
+void expresion_bool() :
+{
+}
+
+{
+  term_bool() expresion_bool_()
+}
+
+void term_bool() :
+{
+}
+
+{
+  factor_bool_unario() term_bool_()
+}
+
+void factor_bool_unario() :
+{
+}
+
+{
+  <tNOT> factor_bool() | factor_bool()
+}
+
+void factor_bool() :
+{
+}
+
+{
+  <tFALSE> | <tTRUE> | relacion()
+}
+
+void relacion() :
+{
+}
+
+{
+  expresion_arit() relacion_()
+}
+
+void expresion_arit() :
+{
+}
+
+{
+  term_arit() expresion_arit_()
+}
+
+void term_arit() :
+{
+}
+
+{
+  factor_arit_unario() term_arit_()
+}
+
+void factor_arit_unario() :
+{
+}
+
+{
+  <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+}
+
+void factor_arit() :
+{
+}
+
+{
+  <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+}
+
+void expresion_bool_() :
+{
+}
+
+{
+  <tOR> term_bool() expresion_bool_() | {}
+}
+
+void term_bool_() :
+{
+}
+
+{
+  <tAND> factor_bool_unario() term_bool_() | {}
+}
+
+void expresion_arit_() :
+{
+}
+
+{
+  <tMAS> term_arit() expresion_arit_() | <tMENOS> term_arit() expresion_arit_() | {}
+}
+
+void term_arit_() :
+{
+}
+
+{
+  <tMUL> factor_arit_unario() term_arit_() | <tDIV> factor_arit_unario() term_arit_() | <tDIVCHAR> factor_arit_unario() term_arit_() | <tMOD> factor_arit_unario() term_arit_() | {}
+}
+
+void seleccion_() :
+{
+}
+
+{
+  expresion_bool() seleccion__()
+}
+
+void caraent_() :
+{
+}
+
+{
+  <tPAR_IZQ> caraent__()
+}
+
+void relacion_() :
+{
+}
+
+{
+  operador_relacional() expresion_arit() | {}
+}
+
+void factor_arit_() :
+{
+}
+
+{
+  <tPAR_IZQ> factor_arit__()
+}
+
+void seleccion__() :
+{
+}
+
+{
+  <tENT> seleccion___()
+}
+
+void caraent__() :
+{
+}
+
+{
+  <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+}
+
+void factor_arit__() :
+{
+}
+
+{
+  <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+}
+
+void seleccion___() :
+{
+}
+
+{
+  lista_sentencias() seleccion____()
+}
+
+void seleccion____() :
+{
+}
+
+{
+  <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
 }

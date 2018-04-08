@@ -531,36 +531,6 @@
       "image": ";"
     },
     {
-      "line": 40,
-      "token": "tID",
-      "image": "el"
-    },
-    {
-      "line": 40,
-      "token": "tID",
-      "image": "dia"
-    },
-    {
-      "line": 40,
-      "token": "tID",
-      "image": "uno"
-    },
-    {
-      "line": 40,
-      "token": "tID",
-      "image": "d"
-    },
-    {
-      "line": 40,
-      "token": "tID",
-      "image": "ese"
-    },
-    {
-      "line": 40,
-      "token": "tID",
-      "image": "mes"
-    },
-    {
       "line": 44,
       "token": "tBOOLEANO",
       "image": "booleano"

@@ -1,0 +1,625 @@
+* Grammar
+
+** Non LL(1) grammar
+
+   #+NAME: non-ll1-grammar
+   #+BEGIN_EXAMPLE
+     %{
+     %}
+
+     %token tENTERO tBOOLEANO tCARACTER
+     %token tMAS tMENOS tMUL tDIVCHAR tDIV tMOD
+     %token tOPAS
+     %token tMAYOR tMENOR tIGUAL tMAI tMEI tNI
+     %token tAND tOR tNOT
+     %token tENTACAR tCARAENT
+     %token tSI tENT tSI_NO tFSI tMQ tFMQ
+     %token tESCRIBIR tLEER
+     %token tVAL tREF tACCION tPRINCIPIO tFIN
+     %token tTRUE tFALSE tKENTERO tKCARACTER tKCADENA tPUNTOCOMA tCOMA tPAR_DCHA tPAR_IZQ
+     %token tPROGRAMA tID
+
+     %start programa
+
+     %%
+     programa : tPROGRAMA tID tPUNTOCOMA declaracion_variables declaracion_acciones bloque_sentencias ;
+     declaracion_variables : declaracion tPUNTOCOMA declaracion_variables | ;
+     declaracion : tipo_variables identificadores ;
+     tipo_variables : tENTERO | tCARACTER | tBOOLEANO ;
+     identificadores : tID repeticion_identificadores ;
+     repeticion_identificadores: tCOMA tID repeticion_identificadores | ;
+     declaracion_acciones : declaracion_accion declaracion_acciones | ;
+     declaracion_accion : cabecera_accion tPUNTOCOMA declaracion_variables declaracion_acciones bloque_sentencias ;
+     cabecera_accion : tACCION tID parametros_formales ;
+     parametros_formales : tPAR_IZQ lista_parametros tPAR_DCHA | ;
+     lista_parametros : parametro repeticion_parametro | ;
+     parametro : clase_parametros tipo_variables identificadores ;
+     repeticion_parametro : tPUNTOCOMA parametro repeticion_parametro | ;
+     clase_parametros : tVAL | tREF ;
+     bloque_sentencias : tPRINCIPIO lista_sentencias tFIN ;
+     lista_sentencias : sentencia lista_sentencias | ;
+     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion | invocacion_accion | seleccion | mientras_que ;
+     leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
+     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_no_vacia tPAR_DCHA ;
+     asignacion : tID tOPAS argumento tPUNTOCOMA ;
+     invocacion_accion : tID argumentos_accion tPUNTOCOMA ;
+     mientras_que : tMQ expresion_bool lista_sentencias tFMQ ;
+     seleccion : tSI expresion_bool tENT lista_sentencias tFSI | tSI expresion_bool tENT lista_sentencias tSI_NO lista_sentencias tFSI ;
+     argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
+     argumento : tKCADENA | entacar | expresion_bool ;
+     lista_argumentos_vacia : argumento repeticion_argumentos | ;
+     lista_argumentos_no_vacia : argumento repeticion_argumentos ;
+     repeticion_argumentos : tCOMA argumento repeticion_argumentos | ;
+     operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
+     caraent : tCARAENT tPAR_IZQ tKCARACTER tPAR_DCHA | tCARAENT tPAR_IZQ entacar tPAR_DCHA | tCARAENT tPAR_IZQ tID tPAR_DCHA;
+     entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
+     expresion_bool : expresion_bool tOR term_bool | term_bool ;
+     term_bool : term_bool tAND factor_bool_unario | factor_bool_unario ;
+     factor_bool_unario : tNOT factor_bool | factor_bool;
+     factor_bool : tFALSE | tTRUE | relacion ;
+     relacion : expresion_arit operador_relacional expresion_arit | expresion_arit ;
+     expresion_arit : expresion_arit tMAS term_arit | expresion_arit tMENOS term_arit | term_arit ;
+     term_arit : term_arit tMUL factor_arit_unario | term_arit tDIV factor_arit_unario | term_arit tDIVCHAR factor_arit_unario | term_arit tMOD factor_arit_unario | factor_arit_unario ;
+     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
+     factor_arit : tKENTERO | tID | caraent | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA ;
+     %%
+   #+END_EXAMPLE
+
+** LL(1) grammar
+
+   #+NAME: ll1-grammar
+   #+BEGIN_EXAMPLE fundamental
+     %start programa
+     %token tENTERO tBOOLEANO tCARACTER tMAS tMENOS tMUL tDIVCHAR tDIV tMOD tOPAS 
+     %token tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tNOT tENTACAR 
+     %token tCARAENT tSI tENT tSI_NO tFSI tMQ tFMQ tESCRIBIR tLEER tVAL 
+     %token tREF tACCION tPRINCIPIO tFIN tTRUE tFALSE tKENTERO tKCARACTER tKCADENA tPUNTOCOMA 
+     %token tCOMA tPAR_DCHA tPAR_IZQ tPROGRAMA tID 
+     %%
+     programa : tPROGRAMA tID tPUNTOCOMA declaracion_variables declaracion_acciones bloque_sentencias ;
+     declaracion_variables : declaracion tPUNTOCOMA declaracion_variables | ;
+     declaracion : tipo_variables identificadores ;
+     tipo_variables : tENTERO | tCARACTER | tBOOLEANO ;
+     identificadores : tID repeticion_identificadores ;
+     repeticion_identificadores : tCOMA tID repeticion_identificadores | ;
+     declaracion_acciones : declaracion_accion declaracion_acciones | ;
+     declaracion_accion : cabecera_accion tPUNTOCOMA declaracion_variables declaracion_acciones bloque_sentencias ;
+     cabecera_accion : tACCION tID parametros_formales ;
+     parametros_formales : tPAR_IZQ lista_parametros tPAR_DCHA | ;
+     lista_parametros : parametro repeticion_parametro | ;
+     parametro : clase_parametros tipo_variables identificadores ;
+     repeticion_parametro : tPUNTOCOMA parametro repeticion_parametro | ;
+     clase_parametros : tVAL | tREF ;
+     bloque_sentencias : tPRINCIPIO lista_sentencias tFIN ;
+     lista_sentencias : sentencia lista_sentencias | ;
+     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion_invocacion | seleccion | mientras_que ;
+     leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
+     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_no_vacia tPAR_DCHA ;
+     asignacion_invocacion : tID asignacion_invocacion' ;
+     asignacion_invocacion' : asignacion | invocacion_accion ;
+     asignacion : tOPAS argumento tPUNTOCOMA ;
+     invocacion_accion : argumentos_accion tPUNTOCOMA ;
+     mientras_que : tMQ expresion_bool lista_sentencias tFMQ ;
+     seleccion : tSI seleccion' ;
+     argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
+     argumento : tKCADENA | entacar | expresion_bool ;
+     lista_argumentos_vacia : | tKCADENA repeticion_argumentos | entacar repeticion_argumentos | expresion_bool repeticion_argumentos ;
+     lista_argumentos_no_vacia : tKCADENA repeticion_argumentos | entacar repeticion_argumentos | expresion_bool repeticion_argumentos ;
+     repeticion_argumentos : tCOMA argumento repeticion_argumentos | ;
+     operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
+     caraent : tCARAENT caraent' ;
+     entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
+     expresion_bool : term_bool expresion_bool' ;
+     term_bool : factor_bool_unario term_bool' ;
+     factor_bool_unario : tNOT factor_bool | factor_bool ;
+     factor_bool : tFALSE | tTRUE | relacion ;
+     relacion : expresion_arit relacion' ;
+     expresion_arit : term_arit expresion_arit' ;
+     term_arit : factor_arit_unario term_arit' ;
+     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
+     factor_arit : tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | tCARAENT factor_arit' ;
+     expresion_bool' : tOR term_bool expresion_bool' | ;
+     term_bool' : tAND factor_bool_unario term_bool' | ;
+     expresion_arit' : tMAS term_arit expresion_arit' | | tMENOS term_arit expresion_arit' ;
+     term_arit' : tMUL factor_arit_unario term_arit' | | tDIV factor_arit_unario term_arit' | tDIVCHAR factor_arit_unario term_arit' | tMOD factor_arit_unario term_arit' ;
+     seleccion' : expresion_bool seleccion'' ;
+     caraent' : tPAR_IZQ caraent'' ;
+     relacion' : operador_relacional expresion_arit | ;
+     factor_arit' : tPAR_IZQ factor_arit'' ;
+     seleccion'' : tENT seleccion''' ;
+     caraent'' : tKCARACTER tPAR_DCHA | entacar tPAR_DCHA | tID tPAR_DCHA ;
+     factor_arit'' : tKCARACTER tPAR_DCHA | entacar tPAR_DCHA | tID tPAR_DCHA ;
+     seleccion''' : lista_sentencias seleccion'''' ;
+     seleccion'''' : tFSI | tSI_NO lista_sentencias tFSI ;
+
+     %%
+   #+END_EXAMPLE
+
+* Converter
+
+  Converts the previous bison style grammar to javacc grammar:
+
+  #+BEGIN_SRC elisp :var grammar = ll1-grammar
+    (defun rule-productions (rules)
+      (setq case-fold-search nil)
+      (replace-regexp-in-string
+       "\\(\\`\\s-*\\|\\s-*\\'\\)" ""
+       (replace-regexp-in-string
+        "\\_<\\([a-z_]+\\)\\_>" "\\1()"
+        (replace-regexp-in-string
+         "\\_<\\(t[A-Z_]+\\)\\_>" "<\\1>"
+         (replace-regexp-in-string
+          "\\`\\s-*\\'" "{}"
+          (replace-regexp-in-string
+           "\\`\\s-*|\\(.*\\)" "\\1 | {}"
+           (replace-regexp-in-string
+            "|\\s-*\\'" "| {}"
+            (replace-regexp-in-string
+             "\\(.*\\)|\\s-*|\\(.*\\)" "\\1|\\2| {}"
+             (replace-regexp-in-string
+              "'" "_" rules)))))))))
+
+    (defun rule (rule)
+      (string-match "\\(?:\\s-\\|^\\)\\(\\(?:\\w\\|_\\)+\\).*:\\(.*\\)" rule)
+      (setq rule-name (subst-char-in-string ?' ?_ (match-string 1 rule)))
+      (format "void %s() :\n{\n}\n\n{\n  %s\n}\n"
+              rule-name
+              (rule-productions (match-string 2 rule))))
+
+    (defun to-javacc (input)
+      (setq case-fold-search nil)
+      (setq input (replace-regexp-in-string "%%\\(\\(?:.\\|\n\\)*\\)%%" "\\1" input))
+      (setq pos 0)
+      (setq javacc-text "")
+      (while (string-match "\\(.+:.*\\);\n" input pos)
+        (setq pos (match-end 0))
+        (setq javacc-text (concat javacc-text "\n" (rule (match-string 1 input))))
+        )
+      javacc-text)
+
+    (to-javacc grammar)
+  #+END_SRC
+
+  #+RESULTS:
+  #+begin_example
+
+    void programa() :
+    {
+    }
+
+    {
+      <tPROGRAMA> <tID> <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    }
+
+    void declaracion_variables() :
+    {
+    }
+
+    {
+      declaracion() <tPUNTOCOMA> declaracion_variables() | {}
+    }
+
+    void declaracion() :
+    {
+    }
+
+    {
+      tipo_variables() identificadores()
+    }
+
+    void tipo_variables() :
+    {
+    }
+
+    {
+      <tENTERO> | <tCARACTER> | <tBOOLEANO>
+    }
+
+    void identificadores() :
+    {
+    }
+
+    {
+      <tID> repeticion_identificadores()
+    }
+
+    void repeticion_identificadores() :
+    {
+    }
+
+    {
+      <tCOMA> <tID> repeticion_identificadores() | {}
+    }
+
+    void declaracion_acciones() :
+    {
+    }
+
+    {
+      declaracion_accion() declaracion_acciones() | {}
+    }
+
+    void declaracion_accion() :
+    {
+    }
+
+    {
+      cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    }
+
+    void cabecera_accion() :
+    {
+    }
+
+    {
+      <tACCION> <tID> parametros_formales()
+    }
+
+    void parametros_formales() :
+    {
+    }
+
+    {
+      <tPAR_IZQ> lista_parametros() <tPAR_DCHA> | {}
+    }
+
+    void lista_parametros() :
+    {
+    }
+
+    {
+      parametro() repeticion_parametro() | {}
+    }
+
+    void parametro() :
+    {
+    }
+
+    {
+      clase_parametros() tipo_variables() identificadores()
+    }
+
+    void repeticion_parametro() :
+    {
+    }
+
+    {
+      <tPUNTOCOMA> parametro() repeticion_parametro() | {}
+    }
+
+    void clase_parametros() :
+    {
+    }
+
+    {
+      <tVAL> | <tREF>
+    }
+
+    void bloque_sentencias() :
+    {
+    }
+
+    {
+      <tPRINCIPIO> lista_sentencias() <tFIN>
+    }
+
+    void lista_sentencias() :
+    {
+    }
+
+    {
+      sentencia() lista_sentencias() | {}
+    }
+
+    void sentencia() :
+    {
+    }
+
+    {
+      leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+    }
+
+    void leer() :
+    {
+    }
+
+    {
+      <tLEER> <tPAR_IZQ> identificadores() <tPAR_DCHA>
+    }
+
+    void escribir() :
+    {
+    }
+
+    {
+      <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+    }
+
+    void asignacion_invocacion() :
+    {
+    }
+
+    {
+      <tID> asignacion_invocacion_()
+    }
+
+    void asignacion_invocacion_() :
+    {
+    }
+
+    {
+      asignacion() | invocacion_accion()
+    }
+
+    void asignacion() :
+    {
+    }
+
+    {
+      <tOPAS> argumento() <tPUNTOCOMA>
+    }
+
+    void invocacion_accion() :
+    {
+    }
+
+    {
+      argumentos_accion() <tPUNTOCOMA>
+    }
+
+    void mientras_que() :
+    {
+    }
+
+    {
+      <tMQ> expresion_bool() lista_sentencias() <tFMQ>
+    }
+
+    void seleccion() :
+    {
+    }
+
+    {
+      <tSI> seleccion_()
+    }
+
+    void argumentos_accion() :
+    {
+    }
+
+    {
+      <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
+    }
+
+    void argumento() :
+    {
+    }
+
+    {
+      <tKCADENA> | entacar() | expresion_bool()
+    }
+
+    void lista_argumentos_vacia() :
+    {
+    }
+
+    {
+      <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+    }
+
+    void lista_argumentos_no_vacia() :
+    {
+    }
+
+    {
+      <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+    }
+
+    void repeticion_argumentos() :
+    {
+    }
+
+    {
+      <tCOMA> argumento() repeticion_argumentos() | {}
+    }
+
+    void operador_relacional() :
+    {
+    }
+
+    {
+      <tMAYOR> | <tMENOR> | <tIGUAL> | <tMAI> | <tMEI> | <tNI>
+    }
+
+    void caraent() :
+    {
+    }
+
+    {
+      <tCARAENT> caraent_()
+    }
+
+    void entacar() :
+    {
+    }
+
+    {
+      <tENTACAR> <tPAR_IZQ> expresion_bool() <tPAR_DCHA>
+    }
+
+    void expresion_bool() :
+    {
+    }
+
+    {
+      term_bool() expresion_bool_()
+    }
+
+    void term_bool() :
+    {
+    }
+
+    {
+      factor_bool_unario() term_bool_()
+    }
+
+    void factor_bool_unario() :
+    {
+    }
+
+    {
+      <tNOT> factor_bool() | factor_bool()
+    }
+
+    void factor_bool() :
+    {
+    }
+
+    {
+      <tFALSE> | <tTRUE> | relacion()
+    }
+
+    void relacion() :
+    {
+    }
+
+    {
+      expresion_arit() relacion_()
+    }
+
+    void expresion_arit() :
+    {
+    }
+
+    {
+      term_arit() expresion_arit_()
+    }
+
+    void term_arit() :
+    {
+    }
+
+    {
+      factor_arit_unario() term_arit_()
+    }
+
+    void factor_arit_unario() :
+    {
+    }
+
+    {
+      <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+    }
+
+    void factor_arit() :
+    {
+    }
+
+    {
+      <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+    }
+
+    void expresion_bool_() :
+    {
+    }
+
+    {
+      <tOR> term_bool() expresion_bool_() | {}
+    }
+
+    void term_bool_() :
+    {
+    }
+
+    {
+      <tAND> factor_bool_unario() term_bool_() | {}
+    }
+
+    void expresion_arit_() :
+    {
+    }
+
+    {
+      <tMAS> term_arit() expresion_arit_() | <tMENOS> term_arit() expresion_arit_() | {}
+    }
+
+    void term_arit_() :
+    {
+    }
+
+    {
+      <tMUL> factor_arit_unario() term_arit_() | <tDIV> factor_arit_unario() term_arit_() | <tDIVCHAR> factor_arit_unario() term_arit_() | <tMOD> factor_arit_unario() term_arit_() | {}
+    }
+
+    void seleccion_() :
+    {
+    }
+
+    {
+      expresion_bool() seleccion__()
+    }
+
+    void caraent_() :
+    {
+    }
+
+    {
+      <tPAR_IZQ> caraent__()
+    }
+
+    void relacion_() :
+    {
+    }
+
+    {
+      operador_relacional() expresion_arit() | {}
+    }
+
+    void factor_arit_() :
+    {
+    }
+
+    {
+      <tPAR_IZQ> factor_arit__()
+    }
+
+    void seleccion__() :
+    {
+    }
+
+    {
+      <tENT> seleccion___()
+    }
+
+    void caraent__() :
+    {
+    }
+
+    {
+      <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+    }
+
+    void factor_arit__() :
+    {
+    }
+
+    {
+      <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+    }
+
+    void seleccion___() :
+    {
+    }
+
+    {
+      lista_sentencias() seleccion____()
+    }
+
+    void seleccion____() :
+    {
+    }
+
+    {
+      <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
+    }
+#+end_example

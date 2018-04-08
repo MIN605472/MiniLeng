@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class LexicalAnalyzerTests {
@@ -82,7 +81,7 @@ public class LexicalAnalyzerTests {
   }
 
   @Test
-  public void tokenFreq() throws FileNotFoundException {
+  public void thatReadsTheSameTokenSequence() throws FileNotFoundException {
     File programsDir = new File(getClass().getResource("/programs/source").getFile());
     for (File f : Objects.requireNonNull(programsDir.listFiles())) {
       MiniLeng.ReInit(new FileReader(f));
