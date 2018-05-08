@@ -7,8 +7,8 @@ import java.util.List;
  */
 public class Symbol {
 
-  private SymbolName name;
-  private int level;
+  private String name;
+  private int scope;
   private SymbolType symbolType;
   private VariableType variableType;
   private ParameterType parameterType;
@@ -25,11 +25,11 @@ public class Symbol {
    * @param name the name of the symbol
    * @param variableType the type of the parameter
    * @param parameterType the parameter type
-   * @param level the level of the symbol
+   * @param scope the scope of the symbol
    * @return the parameter symbol with the specified values
    */
-  public static Symbol buildParameter(SymbolName name, VariableType variableType,
-      ParameterType parameterType, int level) {
+  static Symbol buildParameter(String name, VariableType variableType,
+      ParameterType parameterType, int scope) {
     if (name == null || variableType == null || parameterType == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -37,7 +37,7 @@ public class Symbol {
     symbol.name = name;
     symbol.variableType = variableType;
     symbol.parameterType = parameterType;
-    symbol.level = level;
+    symbol.scope = scope;
     symbol.symbolType = SymbolType.PARAMETER;
     return symbol;
   }
@@ -47,17 +47,17 @@ public class Symbol {
    *
    * @param name the name of the symbol
    * @param variableType the type of the variable
-   * @param level the level of the symbol
+   * @param scope the scope of the symbol
    * @return the variable symbol with the specified values
    */
-  public static Symbol buildVariable(SymbolName name, VariableType variableType, int level) {
+  static Symbol buildVariable(String name, VariableType variableType, int scope) {
     if (name == null || variableType == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
     Symbol symbol = new Symbol();
     symbol.name = name;
     symbol.variableType = variableType;
-    symbol.level = level;
+    symbol.scope = scope;
     symbol.symbolType = SymbolType.VARIABLE;
     return symbol;
   }
@@ -66,16 +66,16 @@ public class Symbol {
    * Build a program symbol.
    *
    * @param name the name of the symbol
-   * @param level the level of the symbol
+   * @param scope the scope of the symbol
    * @return the program symbol with the specified values
    */
-  public static Symbol buildProgram(SymbolName name, int level) {
+  static Symbol buildProgram(String name, int scope) {
     if (name == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
     Symbol symbol = new Symbol();
     symbol.name = name;
-    symbol.level = level;
+    symbol.scope = scope;
     symbol.symbolType = SymbolType.PROGRAM;
     return symbol;
   }
@@ -85,27 +85,27 @@ public class Symbol {
    *
    * @param name the name of the symbol
    * @param parameterList the list of parameter symbols that are part of the action
-   * @param level the level of the symbol
+   * @param scope the scope of the symbol
    * @return the action symbol with the specified values
    */
-  public static Symbol buildAction(SymbolName name, List<Symbol> parameterList, int level) {
+  static Symbol buildAction(String name, List<Symbol> parameterList, int scope) {
     if (name == null || parameterList == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
     Symbol symbol = new Symbol();
     symbol.name = name;
     symbol.parameterList = parameterList;
-    symbol.level = level;
+    symbol.scope = scope;
     symbol.symbolType = SymbolType.ACTION;
     return symbol;
   }
 
-  public SymbolName getName() {
+  public String getName() {
     return name;
   }
 
-  public int getLevel() {
-    return level;
+  public int getScope() {
+    return scope;
   }
 
   public SymbolType getSymbolType() {

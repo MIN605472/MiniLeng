@@ -1,6 +1,9 @@
 package com.minileng.semantic;
 
-public class SymbolName implements CharSequence {
+/**
+ * Class implements the Pearson's hash algorithm.
+ */
+public class PearsonHash {
 
   private static final char T[] = new char[]{
       251, 175, 119, 215, 81, 14, 79, 191, 103, 49, 181, 143, 186, 157, 0,
@@ -22,23 +25,12 @@ public class SymbolName implements CharSequence {
       149, 80, 170, 68, 6, 169, 234, 151
   };
 
-  private String name;
-
-  public SymbolName(String name) {
-    if (name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("A symbol's name can't be null or an empty string.");
-    }
-    this.name = name;
-  }
-
-  // Implementation using Pearson's hashing algorithm
-  @Override
-  public int hashCode() {
+  public static int hash(String str) {
     char hh[] = new char[4];
     for (int i = 0; i < hh.length; ++i) {
-      char h = T[(name.charAt(0) + i) % T.length];
-      for (int j = 0; j < name.length(); ++j) {
-        h = T[h ^ name.charAt(j)];
+      char h = T[(str.charAt(0) + i) % T.length];
+      for (int j = 0; j < str.length(); ++j) {
+        h = T[h ^ str.charAt(j)];
       }
       hh[i] = h;
     }
@@ -47,21 +39,5 @@ public class SymbolName implements CharSequence {
     res |= (hh[2] << 16) & 0xFF0000;
     res |= (hh[3] << 24) & 0xFF000000;
     return res;
-  }
-
-
-  @Override
-  public int length() {
-    return name.length();
-  }
-
-  @Override
-  public char charAt(int i) {
-    return name.charAt(i);
-  }
-
-  @Override
-  public CharSequence subSequence(int i, int i1) {
-    return name.substring(i, i1);
   }
 }

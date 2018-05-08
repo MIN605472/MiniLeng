@@ -1,5 +1,7 @@
 package com.minileng.semantic;
 
+import com.minileng.semantic.Symbol.ParameterType;
+import com.minileng.semantic.Symbol.VariableType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -10,12 +12,24 @@ import java.util.function.Predicate;
  */
 public class SymbolTable {
 
+  private static final SymbolTable INSTANCE = new SymbolTable();
+
   private static final int TABLE_SIZE = 127;
   private LinkedList<Symbol> symbols[];
+  private int scope = 0;
 
   @SuppressWarnings("unchecked")
-  public SymbolTable() {
+  private SymbolTable() {
     symbols = new LinkedList[TABLE_SIZE];
+  }
+
+  /**
+   * Get the single instance of the symbol table.
+   *
+   * @return the instance of the symbol table
+   */
+  public static SymbolTable getInstance() {
+    return INSTANCE;
   }
 
   /**
@@ -24,7 +38,7 @@ public class SymbolTable {
    *
    * @param name the name of the symbol to find
    */
-  public Symbol get(SymbolName name) {
+  public Symbol get(String name) {
     int h = hash(name);
     List<Symbol> l = symbols[h];
     if (l == null) {
@@ -36,12 +50,29 @@ public class SymbolTable {
     return l.get(0);
   }
 
+  public void putParameter(String name, VariableType variableType,
+      ParameterType parameterType) {
+    put(Symbol.buildParameter(name, variableType, parameterType, scope));
+  }
+
+  public void putVariable(String name, VariableType variableType) {
+    put(Symbol.buildVariable(name, variableType, scope));
+  }
+
+  public void putProgram(String name) {
+    put(Symbol.buildProgram(name, scope));
+  }
+
+  public void putAction(String name, List<Symbol> parameterList) {
+    put(Symbol.buildAction(name, parameterList, scope));
+  }
+
   /**
    * Insert the symbol {@code symbol} into the table.
    *
    * @param symbol the symbol to be inserted
    */
-  public void put(Symbol symbol) {
+  private void put(Symbol symbol) {
     int h = hash(symbol.getName());
     LinkedList<Symbol> l = symbols[h];
     if (l == null) {
@@ -92,6 +123,20 @@ public class SymbolTable {
   }
 
   /**
+   * Open new scope.
+   */
+  public void openScope() {
+    ++scope;
+  }
+
+  /**
+   * Close last scope.
+   */
+  public void closeScope() {
+    --scope;
+  }
+
+  /**
    * Remove the hidden parameter symbols that can be found at the level {@code level}.
    *
    * @param level the level at witch we should delete the symbols
@@ -137,7 +182,7 @@ public class SymbolTable {
     ListIterator<Symbol> it = symbols.listIterator();
     while (it.hasNext()) {
       Symbol s = it.next();
-      if (s.getLevel() < level) {
+      if (s.getScope() < level) {
         return;
       }
       if (predicate.test(s)) {
@@ -161,7 +206,7 @@ public class SymbolTable {
       return;
     }
     for (Symbol s : symbols) {
-      if (s.getLevel() < level) {
+      if (s.getScope() < level) {
         return;
       }
       if (predicate.test(s)) {
@@ -189,7 +234,7 @@ public class SymbolTable {
     ListIterator<Symbol> it = symbols.listIterator();
     while (it.hasNext()) {
       Symbol s = it.next();
-      if (symbol.getLevel() >= s.getLevel()) {
+      if (symbol.getScope() >= s.getScope()) {
         break;
       }
     }
@@ -202,9 +247,9 @@ public class SymbolTable {
    * @param name the name of the symbol
    * @return the index inside the table where the symbol name should go
    */
-  private int hash(SymbolName name) {
+  private int hash(String name) {
     assert name != null;
-    return (name.hashCode() & 0x7FFFFFFF) % symbols.length;
+    return (PearsonHash.hash(name) & 0x7FFFFFFF) % symbols.length;
   }
 
 }
