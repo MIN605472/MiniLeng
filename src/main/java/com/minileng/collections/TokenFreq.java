@@ -35,6 +35,21 @@ public class TokenFreq {
   }
 
   /**
+   * If it's the first time the specified token is counted, it's added with a frequency of one. If
+   * it isn't the first time then its frequency is increased by one.
+   *
+   * @param kind the kind of the token to be added
+   */
+  public void addOrInc(int kind) {
+    String name = KindNameMapping.getInstance().name(kind);
+    int count = 1;
+    if (tokenFreq.containsKey(name)) {
+      count = tokenFreq.get(name) + 1;
+    }
+    tokenFreq.put(name, count);
+  }
+
+  /**
    * Get the frequency of the specified token.
    *
    * @param token the token we are interested in

@@ -2,16 +2,35 @@ options
 {
   static = true;
   ignore_case = true;
-  common_token_action = false;
+  common_token_action = true;
   debug_parser = false;
+  java_unicode_escape = true;
 }
 
 PARSER_BEGIN(MiniLeng)
 package com.minileng.generated;
 
+import com.minileng.collections.FollowSets;
+import com.minileng.collections.KindNameMapping;
+import java.util.Set;
 import com.minileng.collections.TokenFreq;
+import com.minileng.exceptions.UnknownTokenException;
+import com.minileng.semantic.Symbol;
+import com.minileng.semantic.SymbolTable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MiniLeng {
+  private static final Logger LOG = LogManager.getLogger();
+
+  public static void recoverParsingError(String nonterminal, ParseException e) {
+    LOG.error("ERROR SINTÁCTICO({}, {}): {}", e.currentToken.next.beginLine,
+      e.currentToken.next.beginColumn, "WIP");
+    Set<String> followSet = FollowSets.getFollowSet(nonterminal);
+    int pos;
+    for (pos = 0; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
+    for (int i = 0; i < pos - 1; ++i) getNextToken();
+  }
 }
 
 PARSER_END(MiniLeng)
@@ -22,6 +41,10 @@ TOKEN_MGR_DECLS :
 
   public static TokenFreq getTokenFreq() {
     return tokenFreq;
+  }
+
+  static void CommonTokenAction(Token t) {
+    tokenFreq.addOrInc(t.kind);
   }
 }
 
@@ -39,243 +62,132 @@ SKIP :
 TOKEN :
 {
   < tENTERO : "entero" >
-    {
-      tokenFreq.addOrInc("tENTERO");
-    }
   | < tBOOLEANO : "booleano" >
-    {
-      tokenFreq.addOrInc("tBOOLEANO");
-    }
   | < tCARACTER : "caracter" >
-    {
-      tokenFreq.addOrInc("tCARACTER");
-    }
 }
 
 // Arithmetic operators
 TOKEN :
 {
   < tMAS : "+" >
-    {
-      tokenFreq.addOrInc("tMAS");
-    }
   | < tMENOS : "-" >
-    {
-      tokenFreq.addOrInc("tMENOS");
-    }
   | < tMUL : "*" >
-    {
-      tokenFreq.addOrInc("tMUL");
-    }
   | < tDIVCHAR : "/" >
-    {
-      tokenFreq.addOrInc("tDIVCHAR");
-    }
   | < tDIV : "div" >
-    {
-      tokenFreq.addOrInc("tDIV");
-    }
   | < tMOD : "mod" >
-    {
-      tokenFreq.addOrInc("tMOD");
-    }
 }
 
 // Asignment operators
 TOKEN :
 {
   < tOPAS : ":=" >
-    {
-      tokenFreq.addOrInc("tOPAS");
-    }
 }
 
 // Relational operators
 TOKEN :
 {
   < tMAYOR : ">" >
-    {
-      tokenFreq.addOrInc("tMAYOR");
-    }
   | < tMENOR : "<" >
-    {
-      tokenFreq.addOrInc("tMENOR");
-    }
   | < tIGUAL : "=" >
-    {
-      tokenFreq.addOrInc("tIGUAL");
-    }
   | < tMAI : ">=" >
-    {
-      tokenFreq.addOrInc("tMAI");
-    }
   | < tMEI : "<=" >
-    {
-      tokenFreq.addOrInc("tMEI");
-    }
   | < tNI : "<>" >
-    {
-      tokenFreq.addOrInc("tNI");
-    }
 }
 
 // Logical operators
 TOKEN :
 {
   < tAND : "and" >
-    {
-      tokenFreq.addOrInc("tAND");
-    }
   | < tOR : "or" >
-    {
-      tokenFreq.addOrInc("tOR");
-    }
   | < tNOT : "not" >
-    {
-      tokenFreq.addOrInc("tNOT");
-    }
 }
 
 // Casting operators
 TOKEN :
 {
   < tENTACAR : "entacar" >
-    {
-      tokenFreq.addOrInc("tENTACAR");
-    }
   | < tCARAENT : "caraent" >
-    {
-      tokenFreq.addOrInc("tCARAENT");
-    }
 }
 
 // Conditional structures
 TOKEN :
 {
   < tSI : "si" >
-    {
-      tokenFreq.addOrInc("tSI");
-    }
   | < tENT : "ent" >
-    {
-      tokenFreq.addOrInc("tENT");
-    }
   | < tSI_NO : "si_no" >
-    {
-      tokenFreq.addOrInc("tSI_NO");
-    }
   | < tFSI : "fsi" >
-    {
-      tokenFreq.addOrInc("tFSI");
-    }
   | < tMQ : "mq" >
-    {
-      tokenFreq.addOrInc("tMQ");
-    }
   | < tFMQ : "fmq" >
-    {
-      tokenFreq.addOrInc("tFMQ");
-    }
 }
 
 // IO
 TOKEN :
 {
   < tESCRIBIR : "escribir" >
-    {
-      tokenFreq.addOrInc("tESCRIBIR");
-    }
   | < tLEER : "leer" >
-    {
-      tokenFreq.addOrInc("tLEER");
-    }
 }
 
 // Procedure related tokens
 TOKEN :
 {
   < tVAL : "val" >
-    {
-      tokenFreq.addOrInc("tVAL");
-    }
   | < tREF : "ref" >
-    {
-      tokenFreq.addOrInc("tREF");
-    }
   | < tACCION : "accion" >
-    {
-      tokenFreq.addOrInc("tACCION");
-    }
   | < tPRINCIPIO : "principio" >
-    {
-      tokenFreq.addOrInc("tPRINCIPIO");
-    }
   | < tFIN : "fin" >
-    {
-      tokenFreq.addOrInc("tFIN");
-    }
 }
 
 // Constants
 TOKEN :
 {
   < tTRUE : "true" >
-    {
-      tokenFreq.addOrInc("tTRUE");
-    }
   | < tFALSE : "false" >
-    {
-      tokenFreq.addOrInc("tFALSE");
-    }
   | < tKENTERO : (["0"-"9"])+ >
-    {
-      tokenFreq.addOrInc("tKENTERO");
-    }
   | < tKCARACTER: "\""(~["\n","\r"])"\"" >
-    {
-      tokenFreq.addOrInc("tKCARACTER");
-    }
   | < tKCADENA: "\""(~["\n","\r","\""])(~["\n","\r","\""])+"\"" >
-    {
-      tokenFreq.addOrInc("tKCADENA");
-    }
   | < tPUNTOCOMA : ";" >
-    {
-      tokenFreq.addOrInc("tPUNTOCOMA");
-    }
   | < tCOMA : "," >
-    {
-      tokenFreq.addOrInc("tCOMA");
-    }
   | < tPAR_DCHA : ")" >
-    {
-      tokenFreq.addOrInc("tPAR_DCHA");
-    }
   | < tPAR_IZQ : "(" >
-    {
-      tokenFreq.addOrInc("tPAR_IZQ");
-    }
 }
 
 // Program
 TOKEN :
 {
   < tPROGRAMA : "programa" >
-    {
-      tokenFreq.addOrInc("tPROGRAMA");
-    }
   | < tID : (["a"-"z"]) | (["a"-"z","_"](["a"-"z","0"-"9","_"])*(["a"-"z","0"-"9"])+) >
-    {
-      tokenFreq.addOrInc("tID");
+}
+
+// Error
+TOKEN :
+{
+  < tERROR : ~[] >
+  {
+    if (true) {
+      throw new UnknownTokenException(
+          "ERROR LÉXICO (" + matchedToken.beginLine + ", " + matchedToken.beginColumn
+              + "): símbolo no reconocido: " + image);
     }
+  }
 }
 
 void programa() :
 {
+  Token tProgram;
 }
 
 {
-  <tPROGRAMA> <tID> <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+  try {
+    tProgram = <tPROGRAMA>
+    {
+      SymbolTable.getInstance().putProgram(tProgram.image);
+    }
+    <tID> <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+  } catch (UnknownTokenException e) {
+    LOG.error(e.getMessage());
+  } catch (ParseException e) {
+    recoverParsingError("programa", e);
+  }
 }
 
 void declaracion_variables() :
@@ -283,7 +195,11 @@ void declaracion_variables() :
 }
 
 {
-  declaracion() <tPUNTOCOMA> declaracion_variables() | {}
+  try {
+    declaracion() <tPUNTOCOMA> declaracion_variables() | {}
+  } catch (ParseException e) {
+    recoverParsingError("declaracion_variables", e);
+  }
 }
 
 void declaracion() :
@@ -291,7 +207,11 @@ void declaracion() :
 }
 
 {
-  tipo_variables() identificadores()
+  try {
+    tipo_variables() identificadores()
+  } catch (ParseException e) {
+    recoverParsingError("declaracion", e);
+  }
 }
 
 void tipo_variables() :
@@ -299,7 +219,11 @@ void tipo_variables() :
 }
 
 {
-  <tENTERO> | <tCARACTER> | <tBOOLEANO>
+  try {
+    <tENTERO> | <tCARACTER> | <tBOOLEANO>
+  } catch (ParseException e) {
+    recoverParsingError("tipo_variables", e);
+  }
 }
 
 void identificadores() :
@@ -307,7 +231,11 @@ void identificadores() :
 }
 
 {
-  <tID> repeticion_identificadores()
+  try {
+    <tID> repeticion_identificadores()
+  } catch (ParseException e) {
+    recoverParsingError("identificadores", e);
+  }
 }
 
 void repeticion_identificadores() :
@@ -315,7 +243,11 @@ void repeticion_identificadores() :
 }
 
 {
-  <tCOMA> <tID> repeticion_identificadores() | {}
+  try {
+    <tCOMA> <tID> repeticion_identificadores() | {}
+  } catch (ParseException e) {
+    recoverParsingError("repeticion_identificadores", e);
+  }
 }
 
 void declaracion_acciones() :
@@ -323,7 +255,11 @@ void declaracion_acciones() :
 }
 
 {
-  declaracion_accion() declaracion_acciones() | {}
+  try {
+    declaracion_accion() declaracion_acciones() | {}
+  } catch (ParseException e) {
+    recoverParsingError("declaracion_acciones", e);
+  }
 }
 
 void declaracion_accion() :
@@ -331,7 +267,11 @@ void declaracion_accion() :
 }
 
 {
-  cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+  try {
+    cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+  } catch (ParseException e) {
+    recoverParsingError("declaracion_accion", e);
+  }
 }
 
 void cabecera_accion() :
@@ -339,7 +279,11 @@ void cabecera_accion() :
 }
 
 {
-  <tACCION> <tID> parametros_formales()
+  try {
+    <tACCION> <tID> parametros_formales()
+  } catch (ParseException e) {
+    recoverParsingError("cabecera_accion", e);
+  }
 }
 
 void parametros_formales() :
@@ -347,7 +291,11 @@ void parametros_formales() :
 }
 
 {
-  <tPAR_IZQ> lista_parametros() <tPAR_DCHA> | {}
+  try {
+    <tPAR_IZQ> lista_parametros() <tPAR_DCHA> | {}
+  } catch (ParseException e) {
+    recoverParsingError("parametros_formales", e);
+  }
 }
 
 void lista_parametros() :
@@ -355,7 +303,11 @@ void lista_parametros() :
 }
 
 {
-  parametro() repeticion_parametro() | {}
+  try {
+    parametro() repeticion_parametro() | {}
+  } catch (ParseException e) {
+    recoverParsingError("lista_parametros", e);
+  }
 }
 
 void parametro() :
@@ -363,7 +315,11 @@ void parametro() :
 }
 
 {
-  clase_parametros() tipo_variables() identificadores()
+  try {
+    clase_parametros() tipo_variables() identificadores()
+  } catch (ParseException e) {
+    recoverParsingError("parametro", e);
+  }
 }
 
 void repeticion_parametro() :
@@ -371,7 +327,11 @@ void repeticion_parametro() :
 }
 
 {
-  <tPUNTOCOMA> parametro() repeticion_parametro() | {}
+  try {
+    <tPUNTOCOMA> parametro() repeticion_parametro() | {}
+  } catch (ParseException e) {
+    recoverParsingError("repeticion_parametro", e);
+  }
 }
 
 void clase_parametros() :
@@ -379,7 +339,11 @@ void clase_parametros() :
 }
 
 {
-  <tVAL> | <tREF>
+  try {
+    <tVAL> | <tREF>
+  } catch (ParseException e) {
+    recoverParsingError("clase_parametros", e);
+  }
 }
 
 void bloque_sentencias() :
@@ -387,7 +351,11 @@ void bloque_sentencias() :
 }
 
 {
-  <tPRINCIPIO> lista_sentencias() <tFIN>
+  try {
+    <tPRINCIPIO> lista_sentencias() <tFIN>
+  } catch (ParseException e) {
+    recoverParsingError("bloque_sentencias", e);
+  }
 }
 
 void lista_sentencias() :
@@ -395,7 +363,11 @@ void lista_sentencias() :
 }
 
 {
-  sentencia() lista_sentencias() | {}
+  try {
+    sentencia() lista_sentencias() | {}
+  } catch (ParseException e) {
+    recoverParsingError("lista_sentencias", e);
+  }
 }
 
 void sentencia() :
@@ -403,7 +375,11 @@ void sentencia() :
 }
 
 {
-  leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+  try {
+    leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+  } catch (ParseException e) {
+    recoverParsingError("sentencia", e);
+  }
 }
 
 void leer() :
@@ -411,7 +387,11 @@ void leer() :
 }
 
 {
-  <tLEER> <tPAR_IZQ> identificadores() <tPAR_DCHA>
+  try {
+    <tLEER> <tPAR_IZQ> identificadores() <tPAR_DCHA>
+  } catch (ParseException e) {
+    recoverParsingError("leer", e);
+  }
 }
 
 void escribir() :
@@ -419,7 +399,11 @@ void escribir() :
 }
 
 {
-  <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+  try {
+    <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+  } catch (ParseException e) {
+    recoverParsingError("escribir", e);
+  }
 }
 
 void asignacion_invocacion() :
@@ -427,7 +411,11 @@ void asignacion_invocacion() :
 }
 
 {
-  <tID> asignacion_invocacion_()
+  try {
+    <tID> asignacion_invocacion_()
+  } catch (ParseException e) {
+    recoverParsingError("asignacion_invocacion", e);
+  }
 }
 
 void asignacion_invocacion_() :
@@ -435,7 +423,11 @@ void asignacion_invocacion_() :
 }
 
 {
-  asignacion() | invocacion_accion()
+  try {
+    asignacion() | invocacion_accion()
+  } catch (ParseException e) {
+    recoverParsingError("asignacion_invocacion_", e);
+  }
 }
 
 void asignacion() :
@@ -443,7 +435,11 @@ void asignacion() :
 }
 
 {
-  <tOPAS> argumento() <tPUNTOCOMA>
+  try {
+    <tOPAS> argumento() <tPUNTOCOMA>
+  } catch (ParseException e) {
+    recoverParsingError("asignacion", e);
+  }
 }
 
 void invocacion_accion() :
@@ -451,7 +447,11 @@ void invocacion_accion() :
 }
 
 {
-  argumentos_accion() <tPUNTOCOMA>
+  try {
+    argumentos_accion() <tPUNTOCOMA>
+  } catch (ParseException e) {
+    recoverParsingError("invocacion_accion", e);
+  }
 }
 
 void mientras_que() :
@@ -459,7 +459,11 @@ void mientras_que() :
 }
 
 {
-  <tMQ> expresion_bool() lista_sentencias() <tFMQ>
+  try {
+    <tMQ> expresion_bool() lista_sentencias() <tFMQ>
+  } catch (ParseException e) {
+    recoverParsingError("mientras_que", e);
+  }
 }
 
 void seleccion() :
@@ -467,7 +471,11 @@ void seleccion() :
 }
 
 {
-  <tSI> seleccion_()
+  try {
+    <tSI> seleccion_()
+  } catch (ParseException e) {
+    recoverParsingError("seleccion", e);
+  }
 }
 
 void argumentos_accion() :
@@ -475,7 +483,11 @@ void argumentos_accion() :
 }
 
 {
-  <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
+  try {
+    <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
+  } catch (ParseException e) {
+    recoverParsingError("argumentos_accion", e);
+  }
 }
 
 void argumento() :
@@ -483,7 +495,11 @@ void argumento() :
 }
 
 {
-  <tKCADENA> | entacar() | expresion_bool()
+  try {
+    <tKCADENA> | entacar() | expresion_bool()
+  } catch (ParseException e) {
+    recoverParsingError("argumento", e);
+  }
 }
 
 void lista_argumentos_vacia() :
@@ -491,7 +507,11 @@ void lista_argumentos_vacia() :
 }
 
 {
-  <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+  try {
+    <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+  } catch (ParseException e) {
+    recoverParsingError("lista_argumentos_vacia", e);
+  }
 }
 
 void lista_argumentos_no_vacia() :
@@ -499,7 +519,11 @@ void lista_argumentos_no_vacia() :
 }
 
 {
-  <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+  try {
+    <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+  } catch (ParseException e) {
+    recoverParsingError("lista_argumentos_no_vacia", e);
+  }
 }
 
 void repeticion_argumentos() :
@@ -507,7 +531,11 @@ void repeticion_argumentos() :
 }
 
 {
-  <tCOMA> argumento() repeticion_argumentos() | {}
+  try {
+    <tCOMA> argumento() repeticion_argumentos() | {}
+  } catch (ParseException e) {
+    recoverParsingError("repeticion_argumentos", e);
+  }
 }
 
 void operador_relacional() :
@@ -515,7 +543,11 @@ void operador_relacional() :
 }
 
 {
-  <tMAYOR> | <tMENOR> | <tIGUAL> | <tMAI> | <tMEI> | <tNI>
+  try {
+    <tMAYOR> | <tMENOR> | <tIGUAL> | <tMAI> | <tMEI> | <tNI>
+  } catch (ParseException e) {
+    recoverParsingError("operador_relacional", e);
+  }
 }
 
 void caraent() :
@@ -523,7 +555,11 @@ void caraent() :
 }
 
 {
-  <tCARAENT> caraent_()
+  try {
+    <tCARAENT> caraent_()
+  } catch (ParseException e) {
+    recoverParsingError("caraent", e);
+  }
 }
 
 void entacar() :
@@ -531,7 +567,11 @@ void entacar() :
 }
 
 {
-  <tENTACAR> <tPAR_IZQ> expresion_bool() <tPAR_DCHA>
+  try {
+    <tENTACAR> <tPAR_IZQ> expresion_bool() <tPAR_DCHA>
+  } catch (ParseException e) {
+    recoverParsingError("entacar", e);
+  }
 }
 
 void expresion_bool() :
@@ -539,7 +579,11 @@ void expresion_bool() :
 }
 
 {
-  term_bool() expresion_bool_()
+  try {
+    term_bool() expresion_bool_()
+  } catch (ParseException e) {
+    recoverParsingError("expresion_bool", e);
+  }
 }
 
 void term_bool() :
@@ -547,7 +591,11 @@ void term_bool() :
 }
 
 {
-  factor_bool_unario() term_bool_()
+  try {
+    factor_bool_unario() term_bool_()
+  } catch (ParseException e) {
+    recoverParsingError("term_bool", e);
+  }
 }
 
 void factor_bool_unario() :
@@ -555,7 +603,11 @@ void factor_bool_unario() :
 }
 
 {
-  <tNOT> factor_bool() | factor_bool()
+  try {
+    <tNOT> factor_bool() | factor_bool()
+  } catch (ParseException e) {
+    recoverParsingError("factor_bool_unario", e);
+  }
 }
 
 void factor_bool() :
@@ -563,7 +615,11 @@ void factor_bool() :
 }
 
 {
-  <tFALSE> | <tTRUE> | relacion()
+  try {
+    <tFALSE> | <tTRUE> | relacion()
+  } catch (ParseException e) {
+    recoverParsingError("factor_bool", e);
+  }
 }
 
 void relacion() :
@@ -571,7 +627,11 @@ void relacion() :
 }
 
 {
-  expresion_arit() relacion_()
+  try {
+    expresion_arit() relacion_()
+  } catch (ParseException e) {
+    recoverParsingError("relacion", e);
+  }
 }
 
 void expresion_arit() :
@@ -579,7 +639,11 @@ void expresion_arit() :
 }
 
 {
-  term_arit() expresion_arit_()
+  try {
+    term_arit() expresion_arit_()
+  } catch (ParseException e) {
+    recoverParsingError("expresion_arit", e);
+  }
 }
 
 void term_arit() :
@@ -587,7 +651,11 @@ void term_arit() :
 }
 
 {
-  factor_arit_unario() term_arit_()
+  try {
+    factor_arit_unario() term_arit_()
+  } catch (ParseException e) {
+    recoverParsingError("term_arit", e);
+  }
 }
 
 void factor_arit_unario() :
@@ -595,7 +663,11 @@ void factor_arit_unario() :
 }
 
 {
-  <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+  try {
+    <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+  } catch (ParseException e) {
+    recoverParsingError("factor_arit_unario", e);
+  }
 }
 
 void factor_arit() :
@@ -603,7 +675,11 @@ void factor_arit() :
 }
 
 {
-  <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+  try {
+    <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+  } catch (ParseException e) {
+    recoverParsingError("factor_arit", e);
+  }
 }
 
 void expresion_bool_() :
@@ -611,7 +687,11 @@ void expresion_bool_() :
 }
 
 {
-  <tOR> term_bool() expresion_bool_() | {}
+  try {
+    <tOR> term_bool() expresion_bool_() | {}
+  } catch (ParseException e) {
+    recoverParsingError("expresion_bool_", e);
+  }
 }
 
 void term_bool_() :
@@ -619,7 +699,11 @@ void term_bool_() :
 }
 
 {
-  <tAND> factor_bool_unario() term_bool_() | {}
+  try {
+    <tAND> factor_bool_unario() term_bool_() | {}
+  } catch (ParseException e) {
+    recoverParsingError("term_bool_", e);
+  }
 }
 
 void expresion_arit_() :
@@ -627,7 +711,11 @@ void expresion_arit_() :
 }
 
 {
-  <tMAS> term_arit() expresion_arit_() | <tMENOS> term_arit() expresion_arit_() | {}
+  try {
+    <tMAS> term_arit() expresion_arit_() | <tMENOS> term_arit() expresion_arit_() | {}
+  } catch (ParseException e) {
+    recoverParsingError("expresion_arit_", e);
+  }
 }
 
 void term_arit_() :
@@ -635,7 +723,11 @@ void term_arit_() :
 }
 
 {
-  <tMUL> factor_arit_unario() term_arit_() | <tDIV> factor_arit_unario() term_arit_() | <tDIVCHAR> factor_arit_unario() term_arit_() | <tMOD> factor_arit_unario() term_arit_() | {}
+  try {
+    <tMUL> factor_arit_unario() term_arit_() | <tDIV> factor_arit_unario() term_arit_() | <tDIVCHAR> factor_arit_unario() term_arit_() | <tMOD> factor_arit_unario() term_arit_() | {}
+  } catch (ParseException e) {
+    recoverParsingError("term_arit_", e);
+  }
 }
 
 void seleccion_() :
@@ -643,7 +735,11 @@ void seleccion_() :
 }
 
 {
-  expresion_bool() seleccion__()
+  try {
+    expresion_bool() seleccion__()
+  } catch (ParseException e) {
+    recoverParsingError("seleccion_", e);
+  }
 }
 
 void caraent_() :
@@ -651,7 +747,11 @@ void caraent_() :
 }
 
 {
-  <tPAR_IZQ> caraent__()
+  try {
+    <tPAR_IZQ> caraent__()
+  } catch (ParseException e) {
+    recoverParsingError("caraent_", e);
+  }
 }
 
 void relacion_() :
@@ -659,7 +759,11 @@ void relacion_() :
 }
 
 {
-  operador_relacional() expresion_arit() | {}
+  try {
+    operador_relacional() expresion_arit() | {}
+  } catch (ParseException e) {
+    recoverParsingError("relacion_", e);
+  }
 }
 
 void factor_arit_() :
@@ -667,7 +771,11 @@ void factor_arit_() :
 }
 
 {
-  <tPAR_IZQ> factor_arit__()
+  try {
+    <tPAR_IZQ> factor_arit__()
+  } catch (ParseException e) {
+    recoverParsingError("factor_arit_", e);
+  }
 }
 
 void seleccion__() :
@@ -675,7 +783,11 @@ void seleccion__() :
 }
 
 {
-  <tENT> seleccion___()
+  try {
+    <tENT> seleccion___()
+  } catch (ParseException e) {
+    recoverParsingError("seleccion__", e);
+  }
 }
 
 void caraent__() :
@@ -683,7 +795,11 @@ void caraent__() :
 }
 
 {
-  <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+  try {
+    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+  } catch (ParseException e) {
+    recoverParsingError("caraent__", e);
+  }
 }
 
 void factor_arit__() :
@@ -691,7 +807,11 @@ void factor_arit__() :
 }
 
 {
-  <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+  try {
+    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+  } catch (ParseException e) {
+    recoverParsingError("factor_arit__", e);
+  }
 }
 
 void seleccion___() :
@@ -699,7 +819,11 @@ void seleccion___() :
 }
 
 {
-  lista_sentencias() seleccion____()
+  try {
+    lista_sentencias() seleccion____()
+  } catch (ParseException e) {
+    recoverParsingError("seleccion___", e);
+  }
 }
 
 void seleccion____() :
@@ -707,5 +831,9 @@ void seleccion____() :
 }
 
 {
-  <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
+  try {
+    <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
+  } catch (ParseException e) {
+    recoverParsingError("seleccion____", e);
+  }
 }
