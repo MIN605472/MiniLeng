@@ -1,0 +1,55 @@
+programa --> $ 
+declaracion_variables --> tACCION tPRINCIPIO 
+declaracion --> tPUNTOCOMA 
+tipo_variables --> tID 
+identificadores --> tPUNTOCOMA tPAR_DCHA 
+repeticion_identificadores --> tPUNTOCOMA tPAR_DCHA 
+declaracion_acciones --> tPRINCIPIO 
+declaracion_accion --> tACCION tPRINCIPIO 
+cabecera_accion --> tPUNTOCOMA 
+parametros_formales --> tPUNTOCOMA 
+lista_parametros --> tPAR_DCHA 
+parametro --> tPUNTOCOMA tPAR_DCHA 
+repeticion_parametro --> tPAR_DCHA 
+clase_parametros --> tENTERO tCARACTER tBOOLEANO 
+bloque_sentencias --> $ tACCION tPRINCIPIO 
+lista_sentencias --> tFIN tFMQ tFSI tSI_NO 
+sentencia --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+leer --> tPUNTOCOMA 
+escribir --> tPUNTOCOMA 
+asignacion_invocacion --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+asignacion_invocacion' --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+asignacion --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+invocacion_accion --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+mientras_que --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+seleccion --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+argumentos_accion --> tPUNTOCOMA 
+argumento --> tPUNTOCOMA tCOMA tPAR_DCHA 
+lista_argumentos_vacia --> tPAR_DCHA 
+lista_argumentos_no_vacia --> tPAR_DCHA 
+repeticion_argumentos --> tPAR_DCHA 
+operador_relacional --> tMAS tMENOS tKENTERO tID tKCARACTER tPAR_IZQ tCARAENT 
+caraent --> 
+entacar --> tPUNTOCOMA tCOMA tPAR_DCHA 
+expresion_bool --> tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+term_bool --> tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+factor_bool_unario --> tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+factor_bool --> tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+relacion --> tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+expresion_arit --> tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+term_arit --> tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+factor_arit_unario --> tMUL tDIV tDIVCHAR tMOD tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+factor_arit --> tMUL tDIV tDIVCHAR tMOD tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+expresion_bool' --> tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+term_bool' --> tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+expresion_arit' --> tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+term_arit' --> tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+seleccion' --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+caraent' --> 
+relacion' --> tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+factor_arit' --> tMUL tDIV tDIVCHAR tMOD tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+seleccion'' --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+caraent'' --> 
+factor_arit'' --> tMUL tDIV tDIVCHAR tMOD tMAS tMENOS tMAYOR tMENOR tIGUAL tMAI tMEI tNI tAND tOR tLEER tESCRIBIR tID tSI tMQ tFMQ tPUNTOCOMA tCOMA tPAR_DCHA tENT 
+seleccion''' --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
+seleccion'''' --> tLEER tESCRIBIR tID tSI tMQ tFIN tFMQ tFSI tSI_NO 
