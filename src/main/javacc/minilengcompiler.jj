@@ -23,9 +23,54 @@ import org.apache.logging.log4j.Logger;
 public class MiniLeng {
   private static final Logger LOG = LogManager.getLogger();
 
+  public static String buildMessage(ParseException e) {
+    StringBuffer expected = new StringBuffer();
+    int maxSize = 0;
+    for (int i = 0; i < e.expectedTokenSequences.length; i++) {
+      if (maxSize < e.expectedTokenSequences[i].length) {
+        maxSize = e.expectedTokenSequences[i].length;
+      }
+      for (int j = 0; j < e.expectedTokenSequences[i].length; j++) {
+        expected.append("<")
+            .append(KindNameMapping.getInstance().name(e.expectedTokenSequences[i][j])).append(">")
+            .append(", ");
+      }
+    }
+    expected.delete(expected.length() - 2, expected.length());
+    String retval = "Encontrado \"";
+    Token tok = e.currentToken.next;
+    for (int i = 0; i < maxSize; i++) {
+      if (i != 0) {
+        retval += " ";
+      }
+      if (tok.kind == 0) {
+        retval += tokenImage[0];
+        break;
+      }
+      retval += "<" + KindNameMapping.getInstance().name(tok.kind) + ">";
+      retval += ":=";
+      retval += ParseException.add_escapes(tok.image);
+      retval += "\"";
+      tok = tok.next;
+    }
+    retval += ". ";
+
+    if (e.expectedTokenSequences.length == 0) {
+      // Nothing to add here
+    } else {
+      if (e.expectedTokenSequences.length == 1) {
+        retval += "Se esperaba: ";
+      } else {
+        retval += "Se esperaba uno de: ";
+      }
+      retval += expected.toString() + ".";
+    }
+    return retval;
+  }
+
   public static void recoverParsingError(String nonterminal, ParseException e) {
     LOG.error("ERROR SINTÁCTICO({}, {}): {}", e.currentToken.next.beginLine,
-      e.currentToken.next.beginColumn, "WIP");
+      e.currentToken.next.beginColumn, buildMessage(e));
     Set<String> followSet = FollowSets.getFollowSet(nonterminal);
     int pos;
     for (pos = 0; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);

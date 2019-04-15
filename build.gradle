@@ -25,6 +25,12 @@ compileJavacc {
     outputDirectory = file(project.buildDir.absolutePath + '/generated/javacc/com/minileng/generated')
 }
 
+jjdoc {
+    inputDirectory = file('src/main/javacc')
+    outputDirectory = file(project.buildDir.absolutePath + '/generated/jjdoc')
+    arguments = [TEXT: 'false', BNF: 'false']
+}
+
 sourceSets {
     main {
         java {
