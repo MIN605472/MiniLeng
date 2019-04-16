@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SyntacticAnalyzerTests {
@@ -80,4 +81,11 @@ public class SyntacticAnalyzerTests {
     Assert.assertEquals(expectedOutput, stdOut.toString());
   }
 
+  // TODO: check why it generates like 4 syntactic errors at the same place
+  @Ignore
+  public void rando() throws ParseException {
+    String p = "programa t; entero a, b, c; principio a := a - b * b / (3 - 42 * (1 + 2 * f(d) - e)); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+  }
 }

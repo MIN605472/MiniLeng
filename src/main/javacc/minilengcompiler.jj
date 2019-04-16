@@ -76,6 +76,48 @@ public class MiniLeng {
     for (pos = 0; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
     for (int i = 0; i < pos - 1; ++i) getNextToken();
   }
+
+  public static Symbol.VariableType toVariableType(int kind) {
+    Symbol.VariableType type;
+    switch(kind) {
+      case tENTERO:
+        type = Symbol.VariableType.INT;
+        break;
+      case tCARACTER:
+        type = Symbol.VariableType.CHAR;
+        break;
+      case tBOOLEANO:
+        type = Symbol.VariableType.BOOL;
+        break;
+      default:
+        type = Symbol.VariableType.UNKNOWN;
+        break;
+    }
+    return type;
+  }
+
+  private static void addIdsSymbolTable(Symbol.SymbolType symbolType,
+      Symbol.VariableType variableType, Symbol.ParameterType parameterType, Token id) {
+    if (symbolType == null) {
+      Symbol s = SymbolTable.getInstance().get(id.image);
+      if (s == null) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+            id.beginColumn, id.image);
+      }
+    } else if (symbolType == Symbol.SymbolType.VARIABLE) {
+      if(!SymbolTable.getInstance().putVariable(id.image, variableType)) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+            id.beginLine, id.beginColumn, id.image);
+      }
+    } else if (symbolType == Symbol.SymbolType.PARAMETER) {
+      if (variableType == null) {
+        variableType = Symbol.VariableType.UNKNOWN;
+      }
+      if(!SymbolTable.getInstance().putParameter(id.image, variableType, parameterType)) {
+        LOG.error("We should never arrive here because a new scope should've been created immediately before.");
+      }
+    }
+  }
 }
 
 PARSER_END(MiniLeng)
@@ -218,16 +260,15 @@ TOKEN :
 
 void programa() :
 {
-  Token tProgram;
+  Token p;
 }
 
 {
   try {
-    tProgram = <tPROGRAMA>
-    {
-      SymbolTable.getInstance().putProgram(tProgram.image);
-    }
-    <tID> <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    <tPROGRAMA> { SymbolTable.getInstance().openScope(); }
+    p = <tID> { SymbolTable.getInstance().putProgram(p.image); }
+    <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    { SymbolTable.getInstance().closeScope(); }
   } catch (UnknownTokenException e) {
     LOG.error(e.getMessage());
   } catch (ParseException e) {
@@ -249,47 +290,76 @@ void declaracion_variables() :
 
 void declaracion() :
 {
+  Symbol.SymbolType symbolType = Symbol.SymbolType.VARIABLE;
+  Symbol.VariableType variableType;
 }
 
 {
   try {
-    tipo_variables() identificadores()
+    variableType = tipo_variables() identificadores(symbolType, variableType, null, null)
   } catch (ParseException e) {
     recoverParsingError("declaracion", e);
   }
 }
 
-void tipo_variables() :
+Symbol.VariableType tipo_variables() :
 {
+  Token t = null;
 }
 
 {
   try {
-    <tENTERO> | <tCARACTER> | <tBOOLEANO>
+    t = <tENTERO> | t = <tCARACTER> | t = <tBOOLEANO>
   } catch (ParseException e) {
     recoverParsingError("tipo_variables", e);
   }
+  { return t == null ? null : toVariableType(t.kind); }
 }
 
-void identificadores() :
+/**
+ * @param symbolType the type of symbol with whom the ids are going to be associated. If null, it
+ * means that nothing should be added to the symbol table.
+ * @param variableType the type of the variable
+ * @param parameterType the type of the parameter. null if {@code symbolType} is not {@code
+ * SymbolType.PARAMETER}
+ * @param actionName the name of the action with whom a parameter is associated. null if {@code
+ * symbolType} is not {@code SymbolType.PARAMETER}
+ * @throws ParseException will never be thrown because we do error recovery
+ */
+void identificadores(Symbol.SymbolType symbolType, Symbol.VariableType variableType,
+    Symbol.ParameterType parameterType, String actionName) :
 {
+  Token id;
 }
 
 {
   try {
-    <tID> repeticion_identificadores()
+    id = <tID>
+    {
+      addIdsSymbolTable(symbolType, variableType, parameterType, id);
+    }
+    repeticion_identificadores(symbolType, variableType, parameterType, actionName)
   } catch (ParseException e) {
     recoverParsingError("identificadores", e);
   }
 }
 
-void repeticion_identificadores() :
+/**
+ * @see #identificadores() for the explanation on the parameters.
+ */
+void repeticion_identificadores(Symbol.SymbolType symbolType, Symbol.VariableType variableType,
+    Symbol.ParameterType parameterType, String actionName) :
 {
+  Token id;
 }
 
 {
   try {
-    <tCOMA> <tID> repeticion_identificadores() | {}
+    <tCOMA> id = <tID>
+    {
+      addIdsSymbolTable(symbolType, variableType, parameterType, id);
+    }
+    repeticion_identificadores(symbolType, variableType, parameterType, actionName) | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_identificadores", e);
   }
@@ -309,86 +379,108 @@ void declaracion_acciones() :
 
 void declaracion_accion() :
 {
+  String actionName;
 }
 
 {
   try {
-    cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    actionName = cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones()
+    bloque_sentencias()
+    {
+      SymbolTable.getInstance().closeScope();
+    }
   } catch (ParseException e) {
     recoverParsingError("declaracion_accion", e);
   }
 }
 
-void cabecera_accion() :
+String cabecera_accion() :
 {
+  Token id = null;
 }
 
 {
   try {
-    <tACCION> <tID> parametros_formales()
+    <tACCION> id = <tID>
+    {
+      if(!SymbolTable.getInstance().putAction(id.image)) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+            id.beginLine, id.beginColumn, id.image);
+      }
+      SymbolTable.getInstance().openScope();
+    }
+    parametros_formales(id.image)
   } catch (ParseException e) {
     recoverParsingError("cabecera_accion", e);
   }
+  {return id == null ? null : id.image;}
 }
 
-void parametros_formales() :
+void parametros_formales(String actionName) :
 {
 }
 
 {
   try {
-    <tPAR_IZQ> lista_parametros() <tPAR_DCHA> | {}
+    <tPAR_IZQ> lista_parametros(actionName) <tPAR_DCHA> | {}
   } catch (ParseException e) {
     recoverParsingError("parametros_formales", e);
   }
 }
 
-void lista_parametros() :
+void lista_parametros(String actionName) :
 {
 }
 
 {
   try {
-    parametro() repeticion_parametro() | {}
+    parametro(actionName) repeticion_parametro(actionName) | {}
   } catch (ParseException e) {
     recoverParsingError("lista_parametros", e);
   }
 }
 
-void parametro() :
+void parametro(String actionName) :
 {
+  Symbol.SymbolType symbolType = Symbol.SymbolType.PARAMETER;
+  Symbol.ParameterType parameterType;
+  Symbol.VariableType variableType;
 }
 
 {
   try {
-    clase_parametros() tipo_variables() identificadores()
+    parameterType = clase_parametros() variableType = tipo_variables()
+    identificadores(symbolType, variableType, parameterType, actionName)
   } catch (ParseException e) {
     recoverParsingError("parametro", e);
   }
 }
 
-void repeticion_parametro() :
+void repeticion_parametro(String actionName) :
 {
 }
 
 {
   try {
-    <tPUNTOCOMA> parametro() repeticion_parametro() | {}
+    <tPUNTOCOMA> parametro(actionName) repeticion_parametro(actionName) | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_parametro", e);
   }
 }
 
-void clase_parametros() :
+Symbol.ParameterType clase_parametros() :
 {
+  Symbol.ParameterType parameterType = null;
 }
 
 {
   try {
-    <tVAL> | <tREF>
+    <tVAL> {parameterType = Symbol.ParameterType.VAL;}
+    | <tREF> {parameterType = Symbol.ParameterType.REF;}
   } catch (ParseException e) {
     recoverParsingError("clase_parametros", e);
   }
+  {return parameterType;}
 }
 
 void bloque_sentencias() :
@@ -433,7 +525,7 @@ void leer() :
 
 {
   try {
-    <tLEER> <tPAR_IZQ> identificadores() <tPAR_DCHA>
+    <tLEER> <tPAR_IZQ> identificadores(null, null, null, null) <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("leer", e);
   }
@@ -453,11 +545,19 @@ void escribir() :
 
 void asignacion_invocacion() :
 {
+  Token id;
 }
 
 {
   try {
-    <tID> asignacion_invocacion_()
+    id = <tID>
+    {
+      if (SymbolTable.getInstance().get(id.image) == null) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+            id.beginColumn, id.image);
+      }
+    }
+    asignacion_invocacion_()
   } catch (ParseException e) {
     recoverParsingError("asignacion_invocacion", e);
   }
@@ -717,11 +817,19 @@ void factor_arit_unario() :
 
 void factor_arit() :
 {
+  Token id;
 }
 
 {
   try {
-    <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+    <tKENTERO> | id = <tID>
+    {
+      if (SymbolTable.getInstance().get(id.image) == null) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+            id.beginColumn, id.image);
+      }
+    }
+    | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
   } catch (ParseException e) {
     recoverParsingError("factor_arit", e);
   }
@@ -837,11 +945,19 @@ void seleccion__() :
 
 void caraent__() :
 {
+  Token id;
 }
 
 {
   try {
-    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | id = <tID>
+    {
+      if (SymbolTable.getInstance().get(id.image) == null) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+            id.beginColumn, id.image);
+      }
+    }
+    <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("caraent__", e);
   }
@@ -849,11 +965,19 @@ void caraent__() :
 
 void factor_arit__() :
 {
+  Token id;
 }
 
 {
   try {
-    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | <tID> <tPAR_DCHA>
+    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | id = <tID>
+    {
+      if (SymbolTable.getInstance().get(id.image) == null) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+            id.beginColumn, id.image);
+      }
+    }
+    <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("factor_arit__", e);
   }

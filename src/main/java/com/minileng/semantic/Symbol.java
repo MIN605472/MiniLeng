@@ -80,6 +80,17 @@ public class Symbol {
     return symbol;
   }
 
+  static Symbol buildAction(String name, int scope) {
+    if (name == null) {
+      throw new IllegalArgumentException("Arguments must be non null");
+    }
+    Symbol symbol = new Symbol();
+    symbol.name = name;
+    symbol.scope = scope;
+    symbol.symbolType = SymbolType.ACTION;
+    return symbol;
+  }
+
   /**
    * Build an action symbol.
    *

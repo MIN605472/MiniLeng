@@ -15,8 +15,8 @@ public class SymbolTable {
   private static final SymbolTable INSTANCE = new SymbolTable();
 
   private static final int TABLE_SIZE = 127;
-  private LinkedList<Symbol> symbols[];
-  private int scope = 0;
+  private List<Symbol> symbols[];
+  private int currentScope = -1;
 
   @SuppressWarnings("unchecked")
   private SymbolTable() {
@@ -50,45 +50,57 @@ public class SymbolTable {
     return l.get(0);
   }
 
-  public void putParameter(String name, VariableType variableType,
+  // TODO: add a new parameter "actionName" so that we can associate a parameter with a specific function symbol
+  public boolean putParameter(String name, VariableType variableType,
       ParameterType parameterType) {
-    put(Symbol.buildParameter(name, variableType, parameterType, scope));
+    return put(Symbol.buildParameter(name, variableType, parameterType, currentScope));
   }
 
-  public void putVariable(String name, VariableType variableType) {
-    put(Symbol.buildVariable(name, variableType, scope));
+  public boolean putVariable(String name, VariableType variableType) {
+    return put(Symbol.buildVariable(name, variableType, currentScope));
   }
 
-  public void putProgram(String name) {
-    put(Symbol.buildProgram(name, scope));
+  public boolean putProgram(String name) {
+    return put(Symbol.buildProgram(name, currentScope));
   }
 
-  public void putAction(String name, List<Symbol> parameterList) {
-    put(Symbol.buildAction(name, parameterList, scope));
+  public boolean putAction(String name, List<Symbol> parameterList) {
+    return put(Symbol.buildAction(name, parameterList, currentScope));
+  }
+
+  public boolean putAction(String name) {
+    return put(Symbol.buildAction(name, currentScope));
   }
 
   /**
    * Insert the symbol {@code symbol} into the table.
    *
    * @param symbol the symbol to be inserted
+   * @return true if the symbol has been inserted, false if there already is a symbol with the same
+   * name in the scope
    */
-  private void put(Symbol symbol) {
+  private boolean put(Symbol symbol) {
     int h = hash(symbol.getName());
-    LinkedList<Symbol> l = symbols[h];
+    if (symbolAlreadyExists(h)) {
+      return false;
+    }
+
+    List<Symbol> l = symbols[h];
     if (l == null) {
-      LinkedList<Symbol> n = new LinkedList<>();
+      List<Symbol> n = new LinkedList<>();
       n.add(symbol);
       symbols[h] = n;
     } else {
       insert(l, symbol);
     }
+    return true;
   }
 
   /**
    * Remove the program symbol. Only one should exist.
    */
   public void removeProgram() {
-    for (LinkedList<Symbol> s : symbols) {
+    for (List<Symbol> s : symbols) {
       if (s != null) {
         s.removeIf(Symbol::isProgram);
       }
@@ -101,7 +113,7 @@ public class SymbolTable {
    * @param level the level at witch we should delete the symbols
    */
   public void removeVariables(int level) {
-    for (LinkedList<Symbol> s : symbols) {
+    for (List<Symbol> s : symbols) {
       if (s != null) {
         removeSymbols(s, level, Symbol::isVariable);
       }
@@ -115,7 +127,7 @@ public class SymbolTable {
    */
 
   public void hideParameters(int level) {
-    for (LinkedList<Symbol> s : symbols) {
+    for (List<Symbol> s : symbols) {
       if (s != null) {
         hideSymbols(s, level, Symbol::isParameter);
       }
@@ -126,14 +138,15 @@ public class SymbolTable {
    * Open new scope.
    */
   public void openScope() {
-    ++scope;
+    ++currentScope;
   }
 
   /**
    * Close last scope.
    */
   public void closeScope() {
-    --scope;
+    removeAllSymbols(currentScope);
+    --currentScope;
   }
 
   /**
@@ -143,7 +156,7 @@ public class SymbolTable {
    */
 
   public void removeHiddenParameters(int level) {
-    for (LinkedList<Symbol> s : symbols) {
+    for (List<Symbol> s : symbols) {
       if (s != null) {
         removeSymbols(s, level, symbol -> symbol.isParameter() && !symbol.isVisible());
       }
@@ -157,7 +170,7 @@ public class SymbolTable {
    */
 
   public void removeActions(int level) {
-    for (LinkedList<Symbol> s : symbols) {
+    for (List<Symbol> s : symbols) {
       if (s != null) {
         removeSymbols(s, level, Symbol::isAction);
       }
@@ -173,7 +186,7 @@ public class SymbolTable {
    * @param level the level
    * @param predicate the predicate
    */
-  private void removeSymbols(LinkedList<Symbol> symbols, int level, Predicate<Symbol> predicate) {
+  private void removeSymbols(List<Symbol> symbols, int level, Predicate<Symbol> predicate) {
     assert symbols != null;
     assert predicate != null;
     if (symbols.isEmpty()) {
@@ -192,6 +205,19 @@ public class SymbolTable {
   }
 
   /**
+   * Remove all symbols at the specified level.
+   *
+   * @param level the scope level from which all symbols all removed
+   */
+  private void removeAllSymbols(int level) {
+    for (List<Symbol> s : symbols) {
+      if (s != null) {
+        removeSymbols(s, level, x -> true);
+      }
+    }
+  }
+
+  /**
    * Mark as invisible the symbols from the list {@code symbols} at the level {@code level} that
    * satisfy the predicate {@code predicate}
    *
@@ -199,7 +225,7 @@ public class SymbolTable {
    * @param level the level
    * @param predicate the predicate
    */
-  private void hideSymbols(LinkedList<Symbol> symbols, int level, Predicate<Symbol> predicate) {
+  private void hideSymbols(List<Symbol> symbols, int level, Predicate<Symbol> predicate) {
     assert symbols != null;
     assert predicate != null;
     if (symbols.isEmpty()) {
@@ -224,12 +250,11 @@ public class SymbolTable {
    * @param symbols the list of symbols
    * @param symbol the symbol to be inserted
    */
-  private void insert(LinkedList<Symbol> symbols, Symbol symbol) {
+  private void insert(List<Symbol> symbols, Symbol symbol) {
     assert symbols != null;
     assert symbol != null;
     if (symbols.isEmpty()) {
       symbols.add(symbol);
-      return;
     }
     ListIterator<Symbol> it = symbols.listIterator();
     while (it.hasNext()) {
@@ -239,6 +264,26 @@ public class SymbolTable {
       }
     }
     it.add(symbol);
+  }
+
+  /**
+   * Check if the specified hash already exists in the symbol table at the current scope level.
+   *
+   * @param hash the hash of a symbol name
+   * @return true if there already exists a symbol whose hashed name is {@code hash} at the current
+   * scope level, false otherwise
+   */
+  private boolean symbolAlreadyExists(int hash) {
+    List<Symbol> s = symbols[hash];
+    return s != null && !s.isEmpty() && s.get(0).getScope() == currentScope;
+  }
+
+  /**
+   * @param name the name of the symbol
+   * @see #symbolAlreadyExists(int)
+   */
+  private boolean symbolAlreadyExists(String name) {
+    return symbolAlreadyExists(hash(name));
   }
 
   /**

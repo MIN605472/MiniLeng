@@ -1,7 +1,7 @@
 package com.minileng.semantic;
 
 /**
- * Class implements the Pearson's hash algorithm.
+ * Class that implements the Pearson's hash algorithm.
  */
 public class PearsonHash {
 
@@ -29,7 +29,7 @@ public class PearsonHash {
     char hh[] = new char[4];
     for (int i = 0; i < hh.length; ++i) {
       char h = T[(str.charAt(0) + i) % T.length];
-      for (int j = 0; j < str.length(); ++j) {
+      for (int j = 1; j < str.length(); ++j) {
         h = T[h ^ str.charAt(j)];
       }
       hh[i] = h;
