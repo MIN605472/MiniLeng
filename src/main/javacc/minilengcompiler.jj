@@ -73,7 +73,7 @@ public class MiniLeng {
       e.currentToken.next.beginColumn, buildMessage(e));
     Set<String> followSet = FollowSets.getFollowSet(nonterminal);
     int pos;
-    for (pos = 0; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
+    for (pos = 2; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
     for (int i = 0; i < pos - 1; ++i) getNextToken();
   }
 

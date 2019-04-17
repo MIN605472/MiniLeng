@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class SyntacticAnalyzerTests {
@@ -81,11 +80,18 @@ public class SyntacticAnalyzerTests {
     Assert.assertEquals(expectedOutput, stdOut.toString());
   }
 
-  // TODO: check why it generates like 4 syntactic errors at the same place
-  @Ignore
+  // Not a very succinct error message, but whatevs
+  @Test
   public void rando() throws ParseException {
-    String p = "programa t; entero a, b, c; principio a := a - b * b / (3 - 42 * (1 + 2 * f(d) - e)); fin";
+    String p = "programa t; entero a, b, c; principio a := a - b * b / (3 - 42 * (1 + 2 * fun(pi) - e)); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
+    String expectedOutput = "ERROR SEMÁNTICO(1, 75): Simbolo no declarado: \"fun\"\n"
+        + "ERROR SINTÁCTICO(1, 78): Encontrado \"<tPAR_IZQ>:=(\". Se esperaba uno de: <tMAS>, <tMENOS>, <tMUL>, <tDIVCHAR>, <tDIV>, <tMOD>, <tMAYOR>, <tMENOR>, <tIGUAL>, <tMAI>, <tMEI>, <tNI>, <tAND>, <tOR>, <tPAR_DCHA>.\n"
+        + "ERROR SINTÁCTICO(1, 79): Encontrado \"<tID>:=pi\". Se esperaba uno de: <tMAS>, <tMENOS>, <tMUL>, <tDIVCHAR>, <tDIV>, <tMOD>, <tMAYOR>, <tMENOR>, <tIGUAL>, <tMAI>, <tMEI>, <tNI>, <tAND>, <tOR>, <tPAR_DCHA>.\n"
+        + "ERROR SINTÁCTICO(1, 81): Encontrado \"<tPAR_DCHA>:=)\". Se esperaba uno de: <tMAS>, <tMENOS>, <tMUL>, <tDIVCHAR>, <tDIV>, <tMOD>, <tMAYOR>, <tMENOR>, <tIGUAL>, <tMAI>, <tMEI>, <tNI>, <tAND>, <tOR>, <tPUNTOCOMA>.\n"
+        + "ERROR SEMÁNTICO(1, 85): Simbolo no declarado: \"e\"\n"
+        + "ERROR SINTÁCTICO(1, 86): Encontrado \"<tPAR_DCHA>:=)\". Se esperaba uno de: <tOPAS>, <tPUNTOCOMA>, <tPAR_IZQ>.\n";
+    Assert.assertEquals(expectedOutput, stdOut.toString());
   }
 }
