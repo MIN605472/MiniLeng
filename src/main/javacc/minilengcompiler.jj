@@ -13,6 +13,8 @@ package com.minileng.generated;
 import com.minileng.collections.FollowSets;
 import com.minileng.collections.KindNameMapping;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import com.minileng.collections.TokenFreq;
 import com.minileng.exceptions.UnknownTokenException;
 import com.minileng.semantic.Symbol;
@@ -116,29 +118,6 @@ public class MiniLeng {
         break;
     }
     return type;
-  }
-
-  private static void addIdsSymbolTable(Symbol.SymbolType symbolType,
-      Symbol.VariableType variableType, Symbol.ParameterType parameterType, Token id) {
-    if (symbolType == null) {
-      Symbol s = SymbolTable.getInstance().get(id.image);
-      if (s == null) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-            id.beginColumn, id.image);
-      }
-    } else if (symbolType == Symbol.SymbolType.VARIABLE) {
-      if(!SymbolTable.getInstance().putVariable(id.image, variableType)) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
-            id.beginLine, id.beginColumn, id.image);
-      }
-    } else if (symbolType == Symbol.SymbolType.PARAMETER) {
-      if (variableType == null) {
-        variableType = Symbol.VariableType.UNKNOWN;
-      }
-      if(!SymbolTable.getInstance().putParameter(id.image, variableType, parameterType)) {
-        LOG.error("We should never arrive here because a new scope should've been created immediately before.");
-      }
-    }
   }
 
   private static boolean relation(Token relToken, int a, int b) {
@@ -332,13 +311,21 @@ void declaracion_variables() :
 
 void declaracion() :
 {
-  Symbol.SymbolType symbolType = Symbol.SymbolType.VARIABLE;
   Symbol.VariableType variableType;
+  List<Token> tokens;
 }
 
 {
   try {
-    variableType = tipo_variables() identificadores(symbolType, variableType, null, null)
+    variableType = tipo_variables() tokens = identificadores()
+    {
+      for (Token id : tokens) {
+          if(null == SymbolTable.getInstance().putVariable(id.image, variableType)) {
+            LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+                id.beginLine, id.beginColumn, id.image);
+          }
+      }
+    }
   } catch (ParseException e) {
     recoverParsingError("declaracion", e);
   }
@@ -358,53 +345,39 @@ Symbol.VariableType tipo_variables() :
   { return t == null ? null : toVariableType(t.kind); }
 }
 
-/**
- * @param symbolType the type of symbol with whom the ids are going to be associated. If null, it
- * means that nothing should be added to the symbol table.
- * @param variableType the type of the variable
- * @param parameterType the type of the parameter. null if {@code symbolType} is not {@code
- * SymbolType.PARAMETER}
- * @param actionName the name of the action with whom a parameter is associated. null if {@code
- * symbolType} is not {@code SymbolType.PARAMETER}
- * @throws ParseException will never be thrown because we do error recovery
- */
-void identificadores(Symbol.SymbolType symbolType, Symbol.VariableType variableType,
-    Symbol.ParameterType parameterType, String actionName) :
+List<Token> identificadores() :
 {
+  List<Token> tokens = new ArrayList<Token>();
+  List<Token> tokensRep;
   Token id;
 }
 
 {
   try {
-    id = <tID>
-    {
-      addIdsSymbolTable(symbolType, variableType, parameterType, id);
-    }
-    repeticion_identificadores(symbolType, variableType, parameterType, actionName)
+    id = <tID> {tokens.add(id);} tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
   } catch (ParseException e) {
     recoverParsingError("identificadores", e);
+    tokens = new ArrayList<Token>();
   }
+  {return tokens;}
 }
 
-/**
- * @see #identificadores() for the explanation on the parameters.
- */
-void repeticion_identificadores(Symbol.SymbolType symbolType, Symbol.VariableType variableType,
-    Symbol.ParameterType parameterType, String actionName) :
+List<Token> repeticion_identificadores() :
 {
+  List<Token> tokens = new ArrayList<Token>();
+  List<Token> tokensRep;
   Token id;
 }
 
 {
   try {
-    <tCOMA> id = <tID>
-    {
-      addIdsSymbolTable(symbolType, variableType, parameterType, id);
-    }
-    repeticion_identificadores(symbolType, variableType, parameterType, actionName) | {}
+    <tCOMA> id = <tID> {tokens.add(id);} tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
+    | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_identificadores", e);
+    tokens = new ArrayList<Token>();
   }
+  {return tokens;}
 }
 
 void declaracion_acciones() :
@@ -421,12 +394,11 @@ void declaracion_acciones() :
 
 void declaracion_accion() :
 {
-  String actionName;
 }
 
 {
   try {
-    actionName = cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones()
+    cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones()
     bloque_sentencias()
     {
       SymbolTable.getInstance().closeScope();
@@ -436,78 +408,107 @@ void declaracion_accion() :
   }
 }
 
-String cabecera_accion() :
+void cabecera_accion() :
 {
-  Token id = null;
+  List<Symbol> params;
+  Token actionId = null;
 }
 
 {
   try {
-    <tACCION> id = <tID>
+    <tACCION> actionId = <tID> params = parametros_formales()
     {
-      if(!SymbolTable.getInstance().putAction(id.image)) {
+      if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
         LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
-            id.beginLine, id.beginColumn, id.image);
+            actionId.beginLine, actionId.beginColumn, actionId.image);
       }
       SymbolTable.getInstance().openScope();
+      if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+            actionId.beginLine, actionId.beginColumn, actionId.image);
+      }
     }
-    parametros_formales(id.image)
   } catch (ParseException e) {
     recoverParsingError("cabecera_accion", e);
   }
-  {return id == null ? null : id.image;}
 }
 
-void parametros_formales(String actionName) :
+List<Symbol> parametros_formales() :
 {
+  List<Symbol> ids;
 }
 
 {
   try {
-    <tPAR_IZQ> lista_parametros(actionName) <tPAR_DCHA> | {}
+    <tPAR_IZQ> ids = lista_parametros() <tPAR_DCHA> | {} {ids = new ArrayList<Symbol>();}
   } catch (ParseException e) {
     recoverParsingError("parametros_formales", e);
+    ids = new ArrayList<Symbol>();
   }
+  {return ids;}
 }
 
-void lista_parametros(String actionName) :
+List<Symbol> lista_parametros() :
 {
+ List<Symbol> parSymbols;
+ List<Symbol> parSymbolsRep;
 }
 
 {
   try {
-    parametro(actionName) repeticion_parametro(actionName) | {}
+    parSymbols = parametro() parSymbolsRep = repeticion_parametro() {parSymbols.addAll(parSymbolsRep);}
+    | {} {parSymbols = new ArrayList<Symbol>();}
   } catch (ParseException e) {
     recoverParsingError("lista_parametros", e);
+    parSymbols = new ArrayList<Symbol>();
   }
+  {return parSymbols;}
 }
 
-void parametro(String actionName) :
+List<Symbol> parametro() :
 {
-  Symbol.SymbolType symbolType = Symbol.SymbolType.PARAMETER;
-  Symbol.ParameterType parameterType;
-  Symbol.VariableType variableType;
+  Symbol.ParameterType parType;
+  Symbol.VariableType varType;
+  List<Token> idTokens;
+  List<Symbol> parSymbols = new ArrayList<Symbol>();
 }
 
 {
   try {
-    parameterType = clase_parametros() variableType = tipo_variables()
-    identificadores(symbolType, variableType, parameterType, actionName)
+    parType = clase_parametros() varType = tipo_variables() idTokens = identificadores()
+    {
+      for (Token id : idTokens) {
+        Symbol parSymbol = SymbolTable.getInstance().putParameter(id.image, varType, parType);
+        if(parSymbol == null) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+              id.beginLine, id.beginColumn, id.image);
+        } else {
+          parSymbols.add(parSymbol);
+        }
+      }
+    }
   } catch (ParseException e) {
     recoverParsingError("parametro", e);
+    parSymbols = new ArrayList<Symbol>();
   }
+  {return parSymbols;}
 }
 
-void repeticion_parametro(String actionName) :
+List<Symbol> repeticion_parametro() :
 {
+  List<Symbol> parSymbols;
+  List<Symbol> parSymbolsRep;
 }
 
 {
   try {
-    <tPUNTOCOMA> parametro(actionName) repeticion_parametro(actionName) | {}
+    <tPUNTOCOMA> parSymbols = parametro() parSymbolsRep = repeticion_parametro() {parSymbols.addAll(parSymbolsRep);}
+    | {} {parSymbols = new ArrayList<Symbol>();}
   } catch (ParseException e) {
     recoverParsingError("repeticion_parametro", e);
+    parSymbols = new ArrayList<Symbol>();
   }
+  {return parSymbols;}
 }
 
 Symbol.ParameterType clase_parametros() :
@@ -563,11 +564,21 @@ void sentencia() :
 
 void leer() :
 {
+  List<Token> idTokens;
 }
 
 {
   try {
-    <tLEER> <tPAR_IZQ> identificadores(null, null, null, null) <tPAR_DCHA>
+    <tLEER> <tPAR_IZQ> idTokens = identificadores()
+    {
+      for (Token id : idTokens) {
+        if (SymbolTable.getInstance().get(id.image) == null) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+              id.beginColumn, id.image);
+        }
+      }
+    }
+    <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("leer", e);
   }

@@ -37,6 +37,7 @@ public class SymbolTable {
    * symbol with that name.
    *
    * @param name the name of the symbol to find
+   * @return the symbol named {@code name}, null if no symbol exists with that name
    */
   public Symbol get(String name) {
     int h = hash(name);
@@ -50,39 +51,33 @@ public class SymbolTable {
     return l.get(0);
   }
 
-  // TODO: add a new parameter "actionName" so that we can associate a parameter with a specific function symbol
-  public boolean putParameter(String name, VariableType variableType,
-      ParameterType parameterType) {
+  public Symbol putParameter(String name, VariableType variableType, ParameterType parameterType) {
     return put(Symbol.buildParameter(name, variableType, parameterType, currentScope));
   }
 
-  public boolean putVariable(String name, VariableType variableType) {
+  public Symbol putVariable(String name, VariableType variableType) {
     return put(Symbol.buildVariable(name, variableType, currentScope));
   }
 
-  public boolean putProgram(String name) {
+  public Symbol putProgram(String name) {
     return put(Symbol.buildProgram(name, currentScope));
   }
 
-  public boolean putAction(String name, List<Symbol> parameterList) {
+  public Symbol putAction(String name, List<Symbol> parameterList) {
     return put(Symbol.buildAction(name, parameterList, currentScope));
-  }
-
-  public boolean putAction(String name) {
-    return put(Symbol.buildAction(name, currentScope));
   }
 
   /**
    * Insert the symbol {@code symbol} into the table.
    *
    * @param symbol the symbol to be inserted
-   * @return true if the symbol has been inserted, false if there already is a symbol with the same
-   * name in the scope
+   * @return the symbol just inserted, null if the symbol can't be inserted because there is already
+   * a symbol with the same name at the same scope level
    */
-  private boolean put(Symbol symbol) {
+  private Symbol put(Symbol symbol) {
     int h = hash(symbol.getName());
     if (symbolAlreadyExists(h)) {
-      return false;
+      return null;
     }
 
     List<Symbol> l = symbols[h];
@@ -93,7 +88,7 @@ public class SymbolTable {
     } else {
       insert(l, symbol);
     }
-    return true;
+    return symbol;
   }
 
   /**
