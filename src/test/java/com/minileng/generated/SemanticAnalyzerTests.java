@@ -43,20 +43,35 @@ public class SemanticAnalyzerTests {
     Assert.assertEquals(expected, stdOut.toString());
   }
 
-  // TODO: finish
-  @Ignore
+  /**
+   * Should report a division by 0 error when the divisor is a constant expression, e.g., "3 - 3 + 3
+   * -3" or "id * 0 - 3 + 3".
+   */
+  @Test
   public void divisionByZero() throws ParseException {
-    String p = "programa t; entero a; principio a := 0 / 0; fin";
+    String p = "programa t; entero a; principio a := 0 / (a * 0 / a * a * 3); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 40): Division por cero\n";
+    Assert.assertEquals(expected, stdOut.toString());
   }
 
-  // TODO: finish
-  @Ignore
-  public void moduloZero() throws ParseException {
-    String p = "programa t; entero a; principio a := 1 mod 0; fin";
+  @Test
+  public void divisionByZeroBooleanExpression() throws ParseException {
+    String p = "programa t; entero a; principio a := 0 div (not ((3 + 3) and False or (2 > 1))); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 40): Division por cero\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
+
+  @Test
+  public void moduloZero() throws ParseException {
+    String p = "programa t; entero a; principio a := 1 mod (a * 0); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 40): Modulo cero\n";
+    Assert.assertEquals(expected, stdOut.toString());
   }
 
   @Test
@@ -91,13 +106,14 @@ public class SemanticAnalyzerTests {
     Assert.assertEquals(expected, stdOut.toString());
   }
 
-  // TODO: finish
-  @Ignore
-  public void entacarValueMustBeBetween0and255() throws ParseException {
-    String p = "programa t; entero a, b, c; principio entacar(420); fin";
+  @Test
+  public void entacarArgsMustBeBetween0and255() throws ParseException {
+    String p = "programa t; entero a, b, c; principio a := entacar(420); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
-
+    String expected = "ERROR SEMÁNTICO(1, 44): El argumento de 'entacar' ha de tener un "
+        + "valorcomprendido entre 0 y 255, ambos incluidos\n";
+    Assert.assertEquals(expected, stdOut.toString());
   }
 
   // TODO: finish
@@ -108,4 +124,19 @@ public class SemanticAnalyzerTests {
     MiniLeng.programa();
   }
 
+  // TODO: finish
+  @Ignore
+  public void numberOfArgumentsAndParametersMismatch() throws ParseException {
+    String p = "programa t; entero arg; accion f(val entero a); principio fin principio f(arg, 0, 1, 2); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+  }
+
+  // TODO: finish
+  @Ignore
+  public void typesOfArgumentsAndParametersMismatch() throws ParseException {
+    String p = "programa t; entero arg; accion f(val entero a); principio fin principio f(arg, 0, 1, 2); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+  }
 }

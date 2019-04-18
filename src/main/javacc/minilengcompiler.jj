@@ -21,6 +21,28 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MiniLeng {
+
+  /**
+   * Simple class is used to indicate if an expression is a constant (e.g., 3 + 3 + 4) and
+   * the value of that expression (e.g., 10) or if isn't a constant expression (e.g., 3 + id)
+   */
+  private static class Constexpr {
+    public boolean isConst;
+    public int value;
+    public Constexpr(boolean isConst, int value) {
+      this.isConst = isConst;
+      this.value = value;
+    }
+    public Constexpr(boolean isConst) {
+      this.isConst = isConst;
+      this.value = -1;
+    }
+    public Constexpr() {
+      this.isConst = false;
+      this.value = -1;
+    }
+  }
+
   private static final Logger LOG = LogManager.getLogger();
 
   public static String buildMessage(ParseException e) {
@@ -118,6 +140,26 @@ public class MiniLeng {
       }
     }
   }
+
+  private static boolean relation(Token relToken, int a, int b) {
+    switch (relToken.kind ) {
+      case tMAYOR:
+        return a > b;
+      case tMENOR:
+        return a < b;
+      case tIGUAL:
+        return a == b;
+      case tMAI:
+        return a >= b;
+      case tMEI:
+        return a <= b;
+      case tNI:
+        return a != b;
+      default:
+        return false;
+    }
+  }
+
 }
 
 PARSER_END(MiniLeng)
@@ -683,16 +725,18 @@ void repeticion_argumentos() :
   }
 }
 
-void operador_relacional() :
+Token operador_relacional() :
 {
+  Token t = null;
 }
 
 {
   try {
-    <tMAYOR> | <tMENOR> | <tIGUAL> | <tMAI> | <tMEI> | <tNI>
+    t = <tMAYOR> | t = <tMENOR> | t = <tIGUAL> | t = <tMAI> | t = <tMEI> | t = <tNI>
   } catch (ParseException e) {
     recoverParsingError("operador_relacional", e);
   }
+  {return t;}
 }
 
 void caraent() :
@@ -707,180 +751,303 @@ void caraent() :
   }
 }
 
-void entacar() :
+Constexpr entacar() :
 {
+   Constexpr constexpr = new Constexpr();
+   Token t;
 }
 
 {
   try {
-    <tENTACAR> <tPAR_IZQ> expresion_bool() <tPAR_DCHA>
+    t = <tENTACAR> <tPAR_IZQ> constexpr = expresion_bool()
+    {
+      if (constexpr.isConst && (constexpr.value < 0 || constexpr.value > 255)) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
+            + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
+      }
+    }
+    <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("entacar", e);
   }
+  {return constexpr;}
 }
 
-void expresion_bool() :
+Constexpr expresion_bool() :
 {
+  Constexpr constexprTermBool = new Constexpr();
+  Constexpr constexprExpresionBool = new Constexpr();
 }
 
 {
   try {
-    term_bool() expresion_bool_()
+    constexprTermBool = term_bool() constexprExpresionBool = expresion_bool_(constexprTermBool)
   } catch (ParseException e) {
     recoverParsingError("expresion_bool", e);
   }
+  {return constexprExpresionBool;}
 }
 
-void term_bool() :
+Constexpr term_bool() :
 {
+  Constexpr factor = new Constexpr();
+  Constexpr term = new Constexpr();
 }
 
 {
   try {
-    factor_bool_unario() term_bool_()
+    factor = factor_bool_unario() term = term_bool_(factor)
   } catch (ParseException e) {
     recoverParsingError("term_bool", e);
   }
+  {return term;}
 }
 
-void factor_bool_unario() :
+Constexpr factor_bool_unario() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tNOT> factor_bool() | factor_bool()
+    <tNOT> constexpr = factor_bool() {constexpr.value = constexpr.value != 0 ? 0 : 1;}
+    | constexpr = factor_bool()
   } catch (ParseException e) {
     recoverParsingError("factor_bool_unario", e);
   }
+  {return constexpr;}
 }
 
-void factor_bool() :
+Constexpr factor_bool() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tFALSE> | <tTRUE> | relacion()
+    <tFALSE> {constexpr.isConst = true; constexpr.value = 0;}
+    | <tTRUE> {constexpr.isConst = true; constexpr.value = 1;}
+    | constexpr = relacion()
   } catch (ParseException e) {
     recoverParsingError("factor_bool", e);
   }
+  {return constexpr;}
 }
 
-void relacion() :
+Constexpr relacion() :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr expr = new Constexpr();
+  Constexpr rel = new Constexpr();
 }
 
 {
   try {
-    expresion_arit() relacion_()
+    expr = expresion_arit() rel = relacion_(expr) {constexpr = rel;}
   } catch (ParseException e) {
     recoverParsingError("relacion", e);
   }
+  {return constexpr;}
 }
 
-void expresion_arit() :
+Constexpr expresion_arit() :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr term = new Constexpr();
+  Constexpr exp = new Constexpr();
 }
 
 {
   try {
-    term_arit() expresion_arit_()
+    term = term_arit() exp = expresion_arit_(term)
   } catch (ParseException e) {
     recoverParsingError("expresion_arit", e);
   }
+  {return exp;}
 }
 
-void term_arit() :
+Constexpr term_arit() :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr factor = new Constexpr();
+  Constexpr term = new Constexpr();
 }
 
 {
   try {
-    factor_arit_unario() term_arit_()
+    factor = factor_arit_unario() term = term_arit_(factor)
   } catch (ParseException e) {
     recoverParsingError("term_arit", e);
   }
+  {return term;}
 }
 
-void factor_arit_unario() :
+Constexpr factor_arit_unario() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+    <tMAS> constexpr = factor_arit()
+    | <tMENOS> constexpr = factor_arit() {constexpr.value = -1 * constexpr.value;}
+    | constexpr = factor_arit()
   } catch (ParseException e) {
     recoverParsingError("factor_arit_unario", e);
   }
+  {return constexpr;}
 }
 
-void factor_arit() :
+Constexpr factor_arit() :
 {
   Token id;
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tKENTERO> | id = <tID>
+    id = <tKENTERO> {constexpr.isConst = true; constexpr.value = Integer.valueOf(id.image);}
+    | id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
         LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
             id.beginColumn, id.image);
       }
     }
-    | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+    | id = <tKCARACTER> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
+    | <tPAR_IZQ> constexpr = expresion_bool() <tPAR_DCHA>
+    | <tCARAENT> constexpr = factor_arit_()
   } catch (ParseException e) {
     recoverParsingError("factor_arit", e);
   }
+  {return constexpr;}
 }
 
-void expresion_bool_() :
+Constexpr expresion_bool_(Constexpr inherit) :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr term = new Constexpr();
+  Constexpr exp = new Constexpr();
 }
 
 {
   try {
-    <tOR> term_bool() expresion_bool_() | {}
+    <tOR> term = term_bool() exp = expresion_bool_(term)
+    {
+      constexpr.isConst = inherit.isConst && exp.isConst;
+      constexpr.value = (inherit.value != 0) || (exp.value != 0) ? 1 : 0;
+    }
+    | {} {constexpr = inherit;}
   } catch (ParseException e) {
     recoverParsingError("expresion_bool_", e);
   }
+  {return constexpr;}
 }
 
-void term_bool_() :
+Constexpr term_bool_(Constexpr inherit) :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr factor = new Constexpr();
+  Constexpr term = new Constexpr();
 }
 
 {
   try {
-    <tAND> factor_bool_unario() term_bool_() | {}
+    <tAND> factor = factor_bool_unario() term = term_bool_(factor)
+    {
+      constexpr.isConst = inherit.isConst && term.isConst;
+      constexpr.value = (inherit.value != 0) && (term.value != 0) ? 1 : 0;
+    }
+    | {} {constexpr = inherit;}
   } catch (ParseException e) {
     recoverParsingError("term_bool_", e);
   }
+  {return constexpr;}
 }
 
-void expresion_arit_() :
+Constexpr expresion_arit_(Constexpr inherit) :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr term = new Constexpr();
+  Constexpr exp = new Constexpr();
 }
 
 {
   try {
-    <tMAS> term_arit() expresion_arit_() | <tMENOS> term_arit() expresion_arit_() | {}
+    <tMAS> term = term_arit() exp = expresion_arit_(term)
+    {
+      constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
+      constexpr.value = inherit.value + exp.value;
+    }
+    | <tMENOS> term = term_arit() exp = expresion_arit_(term)
+    {
+      constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
+      constexpr.value = inherit.value - exp.value;
+    }
+    | {} {constexpr = inherit;}
   } catch (ParseException e) {
     recoverParsingError("expresion_arit_", e);
   }
+  {return constexpr;}
 }
 
-void term_arit_() :
+Constexpr term_arit_(Constexpr inherit) :
 {
+    Constexpr constexpr = new Constexpr();
+    Constexpr factor = new Constexpr();
+    Constexpr term = new Constexpr();
+    Token t;
 }
 
 {
   try {
-    <tMUL> factor_arit_unario() term_arit_() | <tDIV> factor_arit_unario() term_arit_() | <tDIVCHAR> factor_arit_unario() term_arit_() | <tMOD> factor_arit_unario() term_arit_() | {}
+    <tMUL> factor = factor_arit_unario() term = term_arit_(factor)
+    {
+      if (inherit.isConst && factor.isConst) {
+        constexpr.isConst = true;
+        constexpr.value = inherit.value * term.value;
+      } else if ((inherit.isConst && inherit.value == 0)
+            || (factor.isConst && factor.value == 0)) {
+        constexpr.isConst = true;
+        constexpr.value = 0;
+      }
+    }
+    | t = <tDIV> factor = factor_arit_unario() term = term_arit_(factor)
+    {
+      if (term.isConst) {
+        if (term.value == 0) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+        } else {
+          constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
+          constexpr.value = inherit.value / term.value;
+        }
+      }
+    }
+    | t = <tDIVCHAR> factor = factor_arit_unario() term = term_arit_(factor)
+    {
+      if (term.isConst) {
+        if (term.value == 0) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+        } else {
+          constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
+          constexpr.value = inherit.value / term.value;
+        }
+      }
+    }
+    | t = <tMOD> factor = factor_arit_unario() term = term_arit_(factor)
+    {
+      if (term.isConst && term.value == 0) {
+        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
+      } else {
+        constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
+        constexpr.value = inherit.value % term.value;
+      }
+    }
+    | {} {constexpr = inherit;}
   } catch (ParseException e) {
     recoverParsingError("term_arit_", e);
   }
+  {return constexpr;}
 }
 
 void seleccion_() :
@@ -895,40 +1062,53 @@ void seleccion_() :
   }
 }
 
-void caraent_() :
+Constexpr caraent_() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tPAR_IZQ> caraent__()
+    <tPAR_IZQ> constexpr = caraent__()
   } catch (ParseException e) {
     recoverParsingError("caraent_", e);
   }
+  {return constexpr;}
 }
 
-void relacion_() :
+Constexpr relacion_(Constexpr inherit) :
 {
+  Constexpr constexpr = new Constexpr();
+  Constexpr exp = new Constexpr();
+  Token op;
 }
 
 {
   try {
-    operador_relacional() expresion_arit() | {}
+    op = operador_relacional() exp = expresion_arit()
+    {
+      constexpr.value = relation(op, inherit.value, exp.value) ? 1 : 0;
+      constexpr.isConst = inherit.isConst && exp.isConst;
+    }
+    | {} {constexpr = inherit;}
   } catch (ParseException e) {
     recoverParsingError("relacion_", e);
   }
+  {return constexpr;}
 }
 
-void factor_arit_() :
+Constexpr factor_arit_() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tPAR_IZQ> factor_arit__()
+    <tPAR_IZQ> constexpr = factor_arit__()
   } catch (ParseException e) {
     recoverParsingError("factor_arit_", e);
   }
+  {return constexpr;}
 }
 
 void seleccion__() :
@@ -943,14 +1123,17 @@ void seleccion__() :
   }
 }
 
-void caraent__() :
+Constexpr caraent__() :
 {
   Token id;
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | id = <tID>
+    id = <tKCARACTER> <tPAR_DCHA> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
+    | constexpr = entacar() <tPAR_DCHA>
+    | id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
         LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
@@ -961,16 +1144,20 @@ void caraent__() :
   } catch (ParseException e) {
     recoverParsingError("caraent__", e);
   }
+  {return constexpr;}
 }
 
-void factor_arit__() :
+Constexpr factor_arit__() :
 {
   Token id;
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tKCARACTER> <tPAR_DCHA> | entacar() <tPAR_DCHA> | id = <tID>
+    id = <tKCARACTER> <tPAR_DCHA> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
+    | constexpr = entacar() <tPAR_DCHA>
+    | id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
         LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
@@ -981,6 +1168,7 @@ void factor_arit__() :
   } catch (ParseException e) {
     recoverParsingError("factor_arit__", e);
   }
+  {return constexpr;}
 }
 
 void seleccion___() :
