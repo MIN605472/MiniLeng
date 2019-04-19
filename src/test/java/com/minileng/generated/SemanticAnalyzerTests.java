@@ -124,12 +124,22 @@ public class SemanticAnalyzerTests {
     MiniLeng.programa();
   }
 
-  // TODO: finish
-  @Ignore
+  @Test
   public void numberOfArgumentsAndParametersMismatch() throws ParseException {
     String p = "programa t; entero arg; accion f(val entero a); principio fin principio f(arg, 0, 1, 2); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 73): Número de argumentos (4) es distinto al número de parámetros (1) para la acción: \"f\"\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
+
+  @Test
+  public void notAnAction() throws ParseException {
+    String p = "programa t; entero arg; principio arg(0, 1, 2); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 35): El simbolo no es una acción: \"arg\"\n";
+    Assert.assertEquals(expected, stdOut.toString());
   }
 
   // TODO: finish
@@ -138,5 +148,14 @@ public class SemanticAnalyzerTests {
     String p = "programa t; entero arg; accion f(val entero a); principio fin principio f(arg, 0, 1, 2); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
+  }
+
+  @Test
+  public void callingAnActionIsFine() throws ParseException {
+    String p = "programa t; entero arg; accion f(val entero a, b); principio fin principio f(2, 3); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "";
+    Assert.assertEquals(expected, stdOut.toString());
   }
 }

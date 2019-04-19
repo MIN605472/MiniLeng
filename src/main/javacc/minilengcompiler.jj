@@ -288,7 +288,7 @@ void programa() :
   try {
     <tPROGRAMA> { SymbolTable.getInstance().openScope(); }
     p = <tID> { SymbolTable.getInstance().putProgram(p.image); }
-    <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias()
+    <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias() <EOF>
     { SymbolTable.getInstance().closeScope(); }
   } catch (UnknownTokenException e) {
     LOG.error(e.getMessage());
@@ -610,19 +610,34 @@ void asignacion_invocacion() :
             id.beginColumn, id.image);
       }
     }
-    asignacion_invocacion_()
+    asignacion_invocacion_(id)
   } catch (ParseException e) {
     recoverParsingError("asignacion_invocacion", e);
   }
 }
 
-void asignacion_invocacion_() :
+void asignacion_invocacion_(Token id) :
 {
+  int numArgs;
 }
 
 {
   try {
-    asignacion() | invocacion_accion()
+    asignacion()
+    | numArgs = invocacion_accion()
+    {
+      Symbol actionSymbol = SymbolTable.getInstance().get(id.image);
+      if (actionSymbol != null) {
+        if (actionSymbol.getSymbolType() != Symbol.SymbolType.ACTION) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): El simbolo no es una acción: \"{}\"",
+              id.beginLine, id.beginColumn, id.image);
+        } else if (actionSymbol.getParameterList().size() != numArgs) {
+          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Número de argumentos ({}) es distinto al número de"
+              + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
+              actionSymbol.getParameterList().size(), id.image);
+        }
+      }
+    }
   } catch (ParseException e) {
     recoverParsingError("asignacion_invocacion_", e);
   }
@@ -640,16 +655,19 @@ void asignacion() :
   }
 }
 
-void invocacion_accion() :
+int invocacion_accion() :
 {
+  int numArgs;
 }
 
 {
   try {
-    argumentos_accion() <tPUNTOCOMA>
+    numArgs = argumentos_accion() <tPUNTOCOMA>
   } catch (ParseException e) {
     recoverParsingError("invocacion_accion", e);
+    numArgs = 0;
   }
+  {return numArgs;}
 }
 
 void mientras_que() :
@@ -676,16 +694,19 @@ void seleccion() :
   }
 }
 
-void argumentos_accion() :
+int argumentos_accion() :
 {
+  int numArgs = 0;
 }
 
 {
   try {
-    <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
+    <tPAR_IZQ> numArgs = lista_argumentos_vacia() <tPAR_DCHA> | {}
   } catch (ParseException e) {
     recoverParsingError("argumentos_accion", e);
+    numArgs = 0;
   }
+  {return numArgs;}
 }
 
 void argumento() :
@@ -700,40 +721,54 @@ void argumento() :
   }
 }
 
-void lista_argumentos_vacia() :
+int lista_argumentos_vacia() :
 {
+  int numArgs = 1;
+  int numArgsRep = 0;
 }
 
 {
   try {
-    <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+    <tKCADENA> numArgsRep = repeticion_argumentos() | entacar() numArgsRep = repeticion_argumentos()
+    | expresion_bool() numArgsRep = repeticion_argumentos() | {} {numArgs = 0; numArgsRep = 0;}
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_vacia", e);
+    return 0;
   }
+  {numArgs += numArgsRep; return numArgs;}
 }
 
-void lista_argumentos_no_vacia() :
+int lista_argumentos_no_vacia() :
 {
+  int numArgs = 0;
+  int numArgsRep = 0;
 }
 
 {
   try {
-    <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+    <tKCADENA> numArgsRep = repeticion_argumentos() | entacar() numArgsRep = repeticion_argumentos()
+    | expresion_bool() numArgsRep = repeticion_argumentos()
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_no_vacia", e);
+    return 0;
   }
+  {numArgs += numArgsRep; return numArgs;}
 }
 
-void repeticion_argumentos() :
+int repeticion_argumentos() :
 {
+  int numArgs = 0;
+  int numArgsRep;
 }
 
 {
   try {
-    <tCOMA> argumento() repeticion_argumentos() | {}
+    <tCOMA> argumento() {++numArgs;} numArgsRep = repeticion_argumentos() {numArgs += numArgsRep;} | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_argumentos", e);
+    numArgs = 0;
   }
+  {return numArgs;}
 }
 
 Token operador_relacional() :
