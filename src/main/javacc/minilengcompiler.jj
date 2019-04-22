@@ -97,7 +97,7 @@ public class MiniLeng {
       e.currentToken.next.beginColumn, buildMessage(e));
     Set<String> followSet = FollowSets.getFollowSet(nonterminal);
     int pos;
-    for (pos = 2; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
+    for (pos = 1; !followSet.contains(KindNameMapping.getInstance().name(getToken(pos).kind)) ; ++pos);
     for (int i = 0; i < pos - 1; ++i) getNextToken();
   }
 
@@ -163,6 +163,7 @@ SKIP :
   | "\n"
   | "\r"
   | "\r\n"
+  | < tCOMENTARIOMULTI: "%%"(~[])*"%%" >
   | < tCOMENTARIO: "%"(~["\n","\r"])*("\n"|"\r"|"\r\n") >
 }
 
@@ -544,9 +545,21 @@ void lista_sentencias() :
 
 {
   try {
-    sentencia() lista_sentencias() | {}
+    sentencia() repeticion_lista_sentencias()
   } catch (ParseException e) {
     recoverParsingError("lista_sentencias", e);
+  }
+}
+
+void repeticion_lista_sentencias() :
+{
+}
+
+{
+  try {
+    sentencia() repeticion_lista_sentencias() | {}
+  } catch (ParseException e) {
+    recoverParsingError("repeticion_lista_sentencias", e);
   }
 }
 
@@ -556,7 +569,7 @@ void sentencia() :
 
 {
   try {
-    leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+    leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que() | <tPUNTOCOMA>
   } catch (ParseException e) {
     recoverParsingError("sentencia", e);
   }

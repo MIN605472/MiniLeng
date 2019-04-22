@@ -36,8 +36,9 @@
      repeticion_parametro : tPUNTOCOMA parametro repeticion_parametro | ;
      clase_parametros : tVAL | tREF ;
      bloque_sentencias : tPRINCIPIO lista_sentencias tFIN ;
-     lista_sentencias : sentencia lista_sentencias | ;
-     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion | invocacion_accion | seleccion | mientras_que ;
+     lista_sentencias : sentencia repeticion_lista_sentencias ;
+     repeticion_lista_sentencias : sentencia repeticion_lista_sentencias | ;
+     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion | invocacion_accion | seleccion | mientras_que | tPUNTOCOMA ;
      leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
      escribir : tESCRIBIR tPAR_IZQ lista_argumentos_escribir tPAR_DCHA ;
      asignacion : tID tOPAS expresion_bool tPUNTOCOMA ;
@@ -92,8 +93,9 @@
      repeticion_parametro : tPUNTOCOMA parametro repeticion_parametro | ;
      clase_parametros : tVAL | tREF ;
      bloque_sentencias : tPRINCIPIO lista_sentencias tFIN ;
-     lista_sentencias : sentencia lista_sentencias | ;
-     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion_invocacion | seleccion | mientras_que ;
+     lista_sentencias : sentencia repeticion_lista_sentencias ;
+     repeticion_lista_sentencias : sentencia repeticion_lista_sentencias | ;
+     sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion_invocacion | seleccion | mientras_que | tPUNTOCOMA;
      leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
      escribir : tESCRIBIR tPAR_IZQ lista_argumentos_escribir tPAR_DCHA ;
      asignacion_invocacion : tID asignacion_invocacion' ;
@@ -311,7 +313,15 @@
     }
 
     {
-      sentencia() lista_sentencias() | {}
+      sentencia() repeticion_lista_sentencias()
+    }
+
+    void repeticion_lista_sentencias() :
+    {
+    }
+
+    {
+      sentencia() repeticion_lista_sentencias() | {}
     }
 
     void sentencia() :
@@ -319,7 +329,7 @@
     }
 
     {
-      leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que()
+      leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que() | <tPUNTOCOMA>
     }
 
     void leer() :

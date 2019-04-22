@@ -27,7 +27,7 @@ public class SemanticAnalyzerTests {
 
   @Test
   public void symbolAlreadyDeclared() throws ParseException {
-    String p = "programa t; entero a; entero a; principio fin";
+    String p = "programa t; entero a; entero a; principio ; fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expected = "ERROR SEMÁNTICO(1, 30): Simbolo ya declarado previamente: \"a\"\n";
@@ -36,7 +36,7 @@ public class SemanticAnalyzerTests {
 
   @Test
   public void symbolAlreadyDeclaredFunction() throws ParseException {
-    String p = "programa t; entero a; accion a; principio fin principio fin";
+    String p = "programa t; entero a; accion a; principio ; fin principio ; fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expected = "ERROR SEMÁNTICO(1, 30): Simbolo ya declarado previamente: \"a\"\n";
@@ -126,10 +126,10 @@ public class SemanticAnalyzerTests {
 
   @Test
   public void numberOfArgumentsAndParametersMismatch() throws ParseException {
-    String p = "programa t; entero arg; accion f(val entero a); principio fin principio f(arg, 0, 1, 2); fin";
+    String p = "programa t; entero arg; accion f(val entero a); principio ; fin principio f(arg, 0, 1, 2); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
-    String expected = "ERROR SEMÁNTICO(1, 73): Número de argumentos (4) es distinto al número de parámetros (1) para la acción: \"f\"\n";
+    String expected = "ERROR SEMÁNTICO(1, 75): Número de argumentos (4) es distinto al número de parámetros (1) para la acción: \"f\"\n";
     Assert.assertEquals(expected, stdOut.toString());
   }
 
@@ -152,7 +152,7 @@ public class SemanticAnalyzerTests {
 
   @Test
   public void callingAnActionIsFine() throws ParseException {
-    String p = "programa t; entero arg; accion f(val entero a, b); principio fin principio f(2, 3); fin";
+    String p = "programa t; entero arg; accion f(val entero a, b); principio ; fin principio f(2, 3); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expected = "";

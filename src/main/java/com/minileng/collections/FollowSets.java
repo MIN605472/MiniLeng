@@ -107,6 +107,15 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tFIN");
+      s.add("tFMQ");
+      s.add("tFSI");
+      s.add("tSI_NO");
+      followSets.put("repeticion_lista_sentencias", s);
+    }
+    {
+      Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -130,6 +139,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -143,6 +153,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -156,6 +167,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -169,6 +181,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -182,6 +195,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -195,6 +209,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -277,7 +292,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -291,7 +305,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -306,7 +319,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -322,7 +334,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -338,7 +349,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -354,7 +364,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -376,7 +385,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -400,7 +408,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -428,7 +435,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -456,7 +462,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -470,7 +475,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -485,7 +489,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -507,7 +510,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -531,7 +533,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -539,6 +540,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -564,7 +566,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -592,7 +593,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -600,6 +600,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -637,7 +638,6 @@ public class FollowSets {
       s.add("tID");
       s.add("tSI");
       s.add("tMQ");
-      s.add("tFMQ");
       s.add("tCOMA");
       s.add("tPAR_DCHA");
       s.add("tENT");
@@ -645,6 +645,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
@@ -658,6 +659,7 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
       s.add("tID");
