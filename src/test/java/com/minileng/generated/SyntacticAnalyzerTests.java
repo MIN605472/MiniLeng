@@ -94,4 +94,36 @@ public class SyntacticAnalyzerTests {
         + "ERROR SINTÁCTICO(1, 86): Encontrado \"<tPAR_DCHA>:=)\". Se esperaba uno de: <tOPAS>, <tPUNTOCOMA>, <tPAR_IZQ>.\n";
     Assert.assertEquals(expectedOutput, stdOut.toString());
   }
+
+  @Test
+  public void stringAsArgToEscribirIsFine() throws ParseException {
+    String p = "programa t; principio escribir(\"Hola mundo!\"); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expectedOutput = "";
+    Assert.assertEquals(expectedOutput, stdOut.toString());
+  }
+
+  // TODO: it'd be a good idea to create a flag to turn on and off the reporting of semantic errors
+  //  so that we have cleaner syntactic tests
+  @Test
+  public void stringAsArgToAnActionReportsError() throws ParseException {
+    String p = "programa t; entero arg; accion fun(val entero a); principio fin principio fun(\"Hola mundo!\"); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expectedOutput =
+        "ERROR SINTÁCTICO(1, 79): Encontrado \"<tKCADENA>:=\\\"Hola mundo!\\\"\". Se esperaba uno de: <tMAS>, <tMENOS>, <tNOT>, <tENTACAR>, <tCARAENT>, <tTRUE>, <tFALSE>, <tKENTERO>, <tKCARACTER>, <tPAR_DCHA>, <tPAR_IZQ>, <tID>.\n"
+            + "ERROR SEMÁNTICO(1, 75): Número de argumentos (0) es distinto al número de parámetros (1) para la acción: \"fun\"\n";
+    Assert.assertEquals(expectedOutput, stdOut.toString());
+  }
+
+  @Test
+  public void entacarAsOperandIsFine() throws ParseException {
+    String p = "programa t; entero a; principio a := entacar(10) + 3; fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expectedOutput = "";
+    Assert.assertEquals(expectedOutput, stdOut.toString());
+  }
+
 }

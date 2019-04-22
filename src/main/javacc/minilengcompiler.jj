@@ -590,7 +590,7 @@ void escribir() :
 
 {
   try {
-    <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+    <tESCRIBIR> <tPAR_IZQ> lista_argumentos_escribir() <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("escribir", e);
   }
@@ -649,7 +649,7 @@ void asignacion() :
 
 {
   try {
-    <tOPAS> argumento() <tPUNTOCOMA>
+    <tOPAS> expresion_bool() <tPUNTOCOMA>
   } catch (ParseException e) {
     recoverParsingError("asignacion", e);
   }
@@ -709,15 +709,15 @@ int argumentos_accion() :
   {return numArgs;}
 }
 
-void argumento() :
+void argumento_escribir() :
 {
 }
 
 {
   try {
-    <tKCADENA> | entacar() | expresion_bool()
+    <tKCADENA> | expresion_bool()
   } catch (ParseException e) {
-    recoverParsingError("argumento", e);
+    recoverParsingError("argumento_escribir", e);
   }
 }
 
@@ -729,8 +729,7 @@ int lista_argumentos_vacia() :
 
 {
   try {
-    <tKCADENA> numArgsRep = repeticion_argumentos() | entacar() numArgsRep = repeticion_argumentos()
-    | expresion_bool() numArgsRep = repeticion_argumentos() | {} {numArgs = 0; numArgsRep = 0;}
+    expresion_bool() numArgsRep = repeticion_argumentos() | {} {numArgs = 0; numArgsRep = 0;}
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_vacia", e);
     return 0;
@@ -740,19 +739,30 @@ int lista_argumentos_vacia() :
 
 int lista_argumentos_no_vacia() :
 {
-  int numArgs = 0;
+  int numArgs = 1;
   int numArgsRep = 0;
 }
 
 {
   try {
-    <tKCADENA> numArgsRep = repeticion_argumentos() | entacar() numArgsRep = repeticion_argumentos()
-    | expresion_bool() numArgsRep = repeticion_argumentos()
+    expresion_bool() numArgsRep = repeticion_argumentos()
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_no_vacia", e);
     return 0;
   }
   {numArgs += numArgsRep; return numArgs;}
+}
+
+void lista_argumentos_escribir() :
+{
+}
+
+{
+  try {
+    <tKCADENA> repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+  } catch (ParseException e) {
+    recoverParsingError("lista_argumentos_escribir", e);
+  }
 }
 
 int repeticion_argumentos() :
@@ -763,12 +773,24 @@ int repeticion_argumentos() :
 
 {
   try {
-    <tCOMA> argumento() {++numArgs;} numArgsRep = repeticion_argumentos() {numArgs += numArgsRep;} | {}
+    <tCOMA> expresion_bool() {++numArgs;} numArgsRep = repeticion_argumentos() {numArgs += numArgsRep;} | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_argumentos", e);
     numArgs = 0;
   }
   {return numArgs;}
+}
+
+void repeticion_argumentos_escribir() :
+{
+}
+
+{
+  try {
+    <tCOMA> argumento_escribir() repeticion_argumentos_escribir()
+  } catch (ParseException e) {
+    recoverParsingError("repeticion_argumentos_escribir", e);
+  }
 }
 
 Token operador_relacional() :
@@ -962,6 +984,7 @@ Constexpr factor_arit() :
     }
     | id = <tKCARACTER> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
     | <tPAR_IZQ> constexpr = expresion_bool() <tPAR_DCHA>
+    | constexpr = entacar()
     | <tCARAENT> constexpr = factor_arit_()
   } catch (ParseException e) {
     recoverParsingError("factor_arit", e);

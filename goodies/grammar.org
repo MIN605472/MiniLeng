@@ -1,5 +1,4 @@
 * Grammar
-
 ** Non LL(1) grammar
 
    #+NAME: non-ll1-grammar
@@ -40,16 +39,18 @@
      lista_sentencias : sentencia lista_sentencias | ;
      sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion | invocacion_accion | seleccion | mientras_que ;
      leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
-     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_no_vacia tPAR_DCHA ;
-     asignacion : tID tOPAS argumento tPUNTOCOMA ;
+     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_escribir tPAR_DCHA ;
+     asignacion : tID tOPAS expresion_bool tPUNTOCOMA ;
      invocacion_accion : tID argumentos_accion tPUNTOCOMA ;
      mientras_que : tMQ expresion_bool lista_sentencias tFMQ ;
      seleccion : tSI expresion_bool tENT lista_sentencias tFSI | tSI expresion_bool tENT lista_sentencias tSI_NO lista_sentencias tFSI ;
      argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
-     argumento : tKCADENA | entacar | expresion_bool ;
-     lista_argumentos_vacia : argumento repeticion_argumentos | ;
-     lista_argumentos_no_vacia : argumento repeticion_argumentos ;
-     repeticion_argumentos : tCOMA argumento repeticion_argumentos | ;
+     argumento_escribir : tKCADENA | expresion_bool ;
+     lista_argumentos_vacia : expresion_bool repeticion_argumentos | ;
+     lista_argumentos_no_vacia : expresion_bool repeticion_argumentos ;
+     lista_argumentos_escribir : argumento_escribir repeticion_argumentos ;
+     repeticion_argumentos : tCOMA expresion_bool repeticion_argumentos | ;
+     repeticion_argumentos_escribir: tCOMA argumento_escribir repeticion_argumentos_escribir ;
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT tPAR_IZQ tKCARACTER tPAR_DCHA | tCARAENT tPAR_IZQ entacar tPAR_DCHA | tCARAENT tPAR_IZQ tID tPAR_DCHA;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
@@ -61,7 +62,7 @@
      expresion_arit : expresion_arit tMAS term_arit | expresion_arit tMENOS term_arit | term_arit ;
      term_arit : term_arit tMUL factor_arit_unario | term_arit tDIV factor_arit_unario | term_arit tDIVCHAR factor_arit_unario | term_arit tMOD factor_arit_unario | factor_arit_unario ;
      factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
-     factor_arit : tKENTERO | tID | caraent | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA ;
+     factor_arit : tKENTERO | tID | caraent | tKCARACTER | entacar | tPAR_IZQ expresion_bool tPAR_DCHA ;
      %%
    #+END_EXAMPLE
 
@@ -94,18 +95,20 @@
      lista_sentencias : sentencia lista_sentencias | ;
      sentencia : leer tPUNTOCOMA | escribir tPUNTOCOMA | asignacion_invocacion | seleccion | mientras_que ;
      leer : tLEER tPAR_IZQ identificadores tPAR_DCHA ;
-     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_no_vacia tPAR_DCHA ;
+     escribir : tESCRIBIR tPAR_IZQ lista_argumentos_escribir tPAR_DCHA ;
      asignacion_invocacion : tID asignacion_invocacion' ;
      asignacion_invocacion' : asignacion | invocacion_accion ;
-     asignacion : tOPAS argumento tPUNTOCOMA ;
+     asignacion : tOPAS expresion_bool tPUNTOCOMA ;
      invocacion_accion : argumentos_accion tPUNTOCOMA ;
      mientras_que : tMQ expresion_bool lista_sentencias tFMQ ;
      seleccion : tSI seleccion' ;
      argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
-     argumento : tKCADENA | entacar | expresion_bool ;
-     lista_argumentos_vacia : | tKCADENA repeticion_argumentos | entacar repeticion_argumentos | expresion_bool repeticion_argumentos ;
-     lista_argumentos_no_vacia : tKCADENA repeticion_argumentos | entacar repeticion_argumentos | expresion_bool repeticion_argumentos ;
-     repeticion_argumentos : tCOMA argumento repeticion_argumentos | ;
+     argumento_escribir : tKCADENA | expresion_bool ;
+     lista_argumentos_vacia : expresion_bool repeticion_argumentos | ;
+     lista_argumentos_no_vacia : expresion_bool repeticion_argumentos ;
+     lista_argumentos_escribir : tKCADENA repeticion_argumentos | expresion_bool repeticion_argumentos ;
+     repeticion_argumentos : tCOMA expresion_bool repeticion_argumentos | ;
+     repeticion_argumentos_escribir : tCOMA argumento_escribir repeticion_argumentos_escribir ;
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT caraent' ;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
@@ -117,7 +120,7 @@
      expresion_arit : term_arit expresion_arit' ;
      term_arit : factor_arit_unario term_arit' ;
      factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
-     factor_arit : tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | tCARAENT factor_arit' ;
+     factor_arit : tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | entacar | tCARAENT factor_arit' ;
      expresion_bool' : tOR term_bool expresion_bool' | ;
      term_bool' : tAND factor_bool_unario term_bool' | ;
      expresion_arit' : tMAS term_arit expresion_arit' | | tMENOS term_arit expresion_arit' ;
@@ -332,7 +335,7 @@
     }
 
     {
-      <tESCRIBIR> <tPAR_IZQ> lista_argumentos_no_vacia() <tPAR_DCHA>
+      <tESCRIBIR> <tPAR_IZQ> lista_argumentos_escribir() <tPAR_DCHA>
     }
 
     void asignacion_invocacion() :
@@ -356,7 +359,7 @@
     }
 
     {
-      <tOPAS> argumento() <tPUNTOCOMA>
+      <tOPAS> expresion_bool() <tPUNTOCOMA>
     }
 
     void invocacion_accion() :
@@ -391,12 +394,12 @@
       <tPAR_IZQ> lista_argumentos_vacia() <tPAR_DCHA> | {}
     }
 
-    void argumento() :
+    void argumento_escribir() :
     {
     }
 
     {
-      <tKCADENA> | entacar() | expresion_bool()
+      <tKCADENA> | expresion_bool()
     }
 
     void lista_argumentos_vacia() :
@@ -404,7 +407,7 @@
     }
 
     {
-      <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()  | {}
+      expresion_bool() repeticion_argumentos() | {}
     }
 
     void lista_argumentos_no_vacia() :
@@ -412,7 +415,15 @@
     }
 
     {
-      <tKCADENA> repeticion_argumentos() | entacar() repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+      expresion_bool() repeticion_argumentos()
+    }
+
+    void lista_argumentos_escribir() :
+    {
+    }
+
+    {
+      <tKCADENA> repeticion_argumentos() | expresion_bool() repeticion_argumentos()
     }
 
     void repeticion_argumentos() :
@@ -420,7 +431,15 @@
     }
 
     {
-      <tCOMA> argumento() repeticion_argumentos() | {}
+      <tCOMA> expresion_bool() repeticion_argumentos() | {}
+    }
+
+    void repeticion_argumentos_escribir() :
+    {
+    }
+
+    {
+      <tCOMA> argumento_escribir() repeticion_argumentos_escribir()
     }
 
     void operador_relacional() :
@@ -516,7 +535,7 @@
     }
 
     {
-      <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | <tCARAENT> factor_arit_()
+      <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | entacar() | <tCARAENT> factor_arit_()
     }
 
     void expresion_bool_() :
@@ -622,4 +641,4 @@
     {
       <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
     }
-#+end_example
+  #+end_example
