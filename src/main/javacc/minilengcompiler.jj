@@ -93,7 +93,7 @@ public class MiniLeng {
   }
 
   public static void recoverParsingError(String nonterminal, ParseException e) {
-    LOG.error("ERROR SINTÁCTICO({}, {}): {}", e.currentToken.next.beginLine,
+    LOG.info("ERROR SINTÁCTICO({}, {}): {}", e.currentToken.next.beginLine,
       e.currentToken.next.beginColumn, buildMessage(e));
     Set<String> followSet = FollowSets.getFollowSet(nonterminal);
     int pos;
@@ -292,7 +292,7 @@ void programa() :
     <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias() <EOF>
     { SymbolTable.getInstance().closeScope(); }
   } catch (UnknownTokenException e) {
-    LOG.error(e.getMessage());
+    LOG.info(e.getMessage());
   } catch (ParseException e) {
     recoverParsingError("programa", e);
   }

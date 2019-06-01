@@ -25,8 +25,8 @@ public class SyntacticAnalyzerTests {
 
   @BeforeClass
   public static void initParser() {
-    LoggerUtils.addAppender(stdOut, "test");
-    new MiniLeng(new ByteArrayInputStream(new byte[]{}));
+    LoggerUtils.addAppender(stdOut, "SyntacticAnalyzerTests");
+    ParserInitializer.init();
   }
 
 
@@ -85,7 +85,7 @@ public class SyntacticAnalyzerTests {
   //  I think it's normal, but I gotta make the message more succinct
   @Ignore
   public void rando() throws ParseException {
-    String p = "programa t; entero a, b, c; principio a := a - b * b / (3 - 42 * (1 + 2 * (((fun(pi) - 4)-4)-4)- e)); fin";
+    String p = "programa t; entero a, b, c; principio a := ((fun(pi))); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expectedOutput = "";

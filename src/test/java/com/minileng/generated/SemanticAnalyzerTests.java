@@ -16,8 +16,8 @@ public class SemanticAnalyzerTests {
 
   @BeforeClass
   public static void initParser() {
-    LoggerUtils.addAppender(stdOut, "test");
-    new MiniLeng(new ByteArrayInputStream(new byte[]{}));
+    LoggerUtils.addAppender(stdOut, "SemanticAnalyzerTests");
+    ParserInitializer.init();
   }
 
   @Before

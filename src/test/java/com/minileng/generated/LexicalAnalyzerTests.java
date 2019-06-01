@@ -25,8 +25,8 @@ public class LexicalAnalyzerTests {
 
   @BeforeClass
   public static void initParser() {
-    LoggerUtils.addAppender(stdOut, "test");
-    new MiniLeng(new ByteArrayInputStream(new byte[]{}));
+    LoggerUtils.addAppender(stdOut, "LexicalAnalyzerTests");
+    ParserInitializer.init();
   }
 
   private static String stripExtension(String filename) {
