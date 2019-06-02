@@ -139,6 +139,7 @@ public class MiniLeng {
     }
   }
 
+  public static int freeAddress = 3;
 }
 
 PARSER_END(MiniLeng)
@@ -321,8 +322,8 @@ void declaracion() :
     variableType = tipo_variables() tokens = identificadores()
     {
       for (Token id : tokens) {
-          if(null == SymbolTable.getInstance().putVariable(id.image, variableType)) {
-            LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+          if(null == SymbolTable.getInstance().putVariable(id.image, variableType, freeAddress++)) {
+            LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
                 id.beginLine, id.beginColumn, id.image);
           }
       }
@@ -420,12 +421,12 @@ void cabecera_accion() :
     <tACCION> actionId = <tID> params = parametros_formales()
     {
       if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
       }
       SymbolTable.getInstance().openScope();
       if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
       }
     }
@@ -481,7 +482,7 @@ List<Symbol> parametro() :
       for (Token id : idTokens) {
         Symbol parSymbol = SymbolTable.getInstance().putParameter(id.image, varType, parType);
         if(parSymbol == null) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+          LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
               id.beginLine, id.beginColumn, id.image);
         } else {
           parSymbols.add(parSymbol);
@@ -586,7 +587,7 @@ void leer() :
     {
       for (Token id : idTokens) {
         if (SymbolTable.getInstance().get(id.image) == null) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+          LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
               id.beginColumn, id.image);
         }
       }
@@ -619,7 +620,7 @@ void asignacion_invocacion() :
     id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
             id.beginColumn, id.image);
       }
     }
@@ -632,22 +633,30 @@ void asignacion_invocacion() :
 void asignacion_invocacion_(Token id) :
 {
   int numArgs;
+  Symbol idSym = SymbolTable.getInstance().get(id.image);
 }
 
 {
   try {
     asignacion()
+    {
+      if (idSym != null) {
+        if (idSym.getSymbolType() != Symbol.SymbolType.VARIABLE && idSym.getSymbolType() != Symbol.SymbolType.PARAMETER) {
+          LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
+                      id.beginLine, id.beginColumn, id.image);
+        }
+      }
+    }
     | numArgs = invocacion_accion()
     {
-      Symbol actionSymbol = SymbolTable.getInstance().get(id.image);
-      if (actionSymbol != null) {
-        if (actionSymbol.getSymbolType() != Symbol.SymbolType.ACTION) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): El simbolo no es una acción: \"{}\"",
+      if (idSym != null) {
+        if (idSym.getSymbolType() != Symbol.SymbolType.ACTION) {
+          LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
               id.beginLine, id.beginColumn, id.image);
-        } else if (actionSymbol.getParameterList().size() != numArgs) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Número de argumentos ({}) es distinto al número de"
+        } else if (idSym.getParameterList().size() != numArgs) {
+          LOG.info("ERROR SEMÁNTICO({}, {}): Número de argumentos ({}) es distinto al número de"
               + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
-              actionSymbol.getParameterList().size(), id.image);
+              idSym.getParameterList().size(), id.image);
         }
       }
     }
@@ -843,7 +852,7 @@ Constexpr entacar() :
     t = <tENTACAR> <tPAR_IZQ> constexpr = expresion_bool()
     {
       if (constexpr.isConst && (constexpr.value < 0 || constexpr.value > 255)) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
+        LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
             + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
       }
     }
@@ -990,8 +999,9 @@ Constexpr factor_arit() :
     id = <tKENTERO> {constexpr.isConst = true; constexpr.value = Integer.valueOf(id.image);}
     | id = <tID>
     {
-      if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+      Symbol sym = SymbolTable.getInstance().get(id.image);
+      if (sym == null) {
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
             id.beginColumn, id.image);
       }
     }
@@ -1098,7 +1108,7 @@ Constexpr term_arit_(Constexpr inherit) :
     {
       if (term.isConst) {
         if (term.value == 0) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+          LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
         } else {
           constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
           constexpr.value = inherit.value / term.value;
@@ -1109,7 +1119,7 @@ Constexpr term_arit_(Constexpr inherit) :
     {
       if (term.isConst) {
         if (term.value == 0) {
-          LOG.info("ERROR SEM\u00c1NTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+          LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
         } else {
           constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
           constexpr.value = inherit.value / term.value;
@@ -1119,7 +1129,7 @@ Constexpr term_arit_(Constexpr inherit) :
     | t = <tMOD> factor = factor_arit_unario() term = term_arit_(factor)
     {
       if (term.isConst && term.value == 0) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
+        LOG.info("ERROR SEMÁNTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
       } else {
         constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
         constexpr.value = inherit.value % term.value;
@@ -1218,7 +1228,7 @@ Constexpr caraent__() :
     | id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
             id.beginColumn, id.image);
       }
     }
@@ -1242,7 +1252,7 @@ Constexpr factor_arit__() :
     | id = <tID>
     {
       if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEM\u00c1NTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
             id.beginColumn, id.image);
       }
     }

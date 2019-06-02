@@ -55,8 +55,8 @@ public class SymbolTable {
     return put(Symbol.buildParameter(name, variableType, parameterType, currentScope));
   }
 
-  public Symbol putVariable(String name, VariableType variableType) {
-    return put(Symbol.buildVariable(name, variableType, currentScope));
+  public Symbol putVariable(String name, VariableType variableType, int address) {
+    return put(Symbol.buildVariable(name, variableType, currentScope, address));
   }
 
   public Symbol putProgram(String name) {

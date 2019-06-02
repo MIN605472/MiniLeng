@@ -158,4 +158,14 @@ public class SemanticAnalyzerTests {
     String expected = "";
     Assert.assertEquals(expected, stdOut.toString());
   }
+
+  @Test
+  public void cantAssignToANonVariable() throws ParseException {
+    String p = "programa t; entero arg; accion f(val entero a, b); principio ; fin principio f := arg; t := arg; fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 78): El simbolo no es una variable o un parámetro: \"f\"\n"
+        + "ERROR SEMÁNTICO(1, 88): El simbolo no es una variable o un parámetro: \"t\"\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
 }

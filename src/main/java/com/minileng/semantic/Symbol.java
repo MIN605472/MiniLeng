@@ -50,7 +50,7 @@ public class Symbol {
    * @param scope the scope of the symbol
    * @return the variable symbol with the specified values
    */
-  static Symbol buildVariable(String name, VariableType variableType, int scope) {
+  static Symbol buildVariable(String name, VariableType variableType, int scope, int address) {
     if (name == null || variableType == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -59,6 +59,7 @@ public class Symbol {
     symbol.variableType = variableType;
     symbol.scope = scope;
     symbol.symbolType = SymbolType.VARIABLE;
+    symbol.address = address;
     return symbol;
   }
 
