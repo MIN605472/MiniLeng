@@ -164,8 +164,31 @@ public class SemanticAnalyzerTests {
     String p = "programa t; entero arg; accion f(val entero a, b); principio ; fin principio f := arg; t := arg; fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
-    String expected = "ERROR SEMÁNTICO(1, 78): El simbolo no es una variable o un parámetro: \"f\"\n"
-        + "ERROR SEMÁNTICO(1, 88): El simbolo no es una variable o un parámetro: \"t\"\n";
+    String expected =
+        "ERROR SEMÁNTICO(1, 78): El simbolo no es una variable o un parámetro: \"f\"\n"
+            + "ERROR SEMÁNTICO(1, 88): El simbolo no es una variable o un parámetro: \"t\"\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
+
+  @Test
+  public void expressionsCantWorkWithNonVariablesOperands() throws ParseException {
+    String p = "programa t; entero arg; accion f(val entero a, b); principio ; fin principio arg := 3 * f; fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 89): El simbolo no es una variable o un parámetro: \"f\"\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
+
+  @Test
+  public void leerCantWorkWithNonVariablesArguments() throws ParseException {
+    String p = "programa t; entero arg; accion f1(val entero a, b); principio ; fin "
+        + "accion f2(val entero a, b); principio ; fin accion f3(val entero a, b); principio ; fin "
+        + "principio leer(f1, f2, f3); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 172): El simbolo no es una variable o un parámetro: \"f1\"\n"
+        + "ERROR SEMÁNTICO(1, 176): El simbolo no es una variable o un parámetro: \"f2\"\n"
+        + "ERROR SEMÁNTICO(1, 180): El simbolo no es una variable o un parámetro: \"f3\"\n";
     Assert.assertEquals(expected, stdOut.toString());
   }
 }

@@ -67,6 +67,10 @@ public class SymbolTable {
     return put(Symbol.buildAction(name, parameterList, currentScope));
   }
 
+  public Symbol putSymbol(Symbol symbol) {
+    return put(symbol);
+  }
+
   /**
    * Insert the symbol {@code symbol} into the table.
    *
@@ -290,6 +294,10 @@ public class SymbolTable {
   private int hash(String name) {
     assert name != null;
     return (PearsonHash.hash(name) & 0x7FFFFFFF) % symbols.length;
+  }
+
+  public int getCurrentScope() {
+    return currentScope;
   }
 
 }

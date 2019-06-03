@@ -45,6 +45,12 @@ public class MiniLeng {
     }
   }
 
+  private static class ParamsInfo {
+    Symbol.ParameterType parType;
+    Symbol.VariableType varType;
+    List<Token> idTokens;
+  }
+
   private static final Logger LOG = LogManager.getLogger();
 
   public static String buildMessage(ParseException e) {
@@ -412,7 +418,7 @@ void declaracion_accion() :
 
 void cabecera_accion() :
 {
-  List<Symbol> params;
+  List<ParamsInfo> params;
   Token actionId = null;
 }
 
@@ -420,14 +426,31 @@ void cabecera_accion() :
   try {
     <tACCION> actionId = <tID> params = parametros_formales()
     {
-      if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
+      List<Symbol> paramSyms = new ArrayList<Symbol>();
+      for (ParamsInfo paramsInfo : params) {
+        for (Token idToken : paramsInfo.idTokens) {
+          int currentScope = SymbolTable.getInstance().getCurrentScope();
+          Symbol param = Symbol.buildParameter(idToken.image, paramsInfo.varType, paramsInfo.parType, currentScope + 1);
+          paramSyms.add(param);
+        }
+      }
+      if(null == SymbolTable.getInstance().putAction(actionId.image, paramSyms)) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
       }
       SymbolTable.getInstance().openScope();
-      if(null == SymbolTable.getInstance().putAction(actionId.image, params)) {
+      if(null == SymbolTable.getInstance().putAction(actionId.image, paramSyms)) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
+      }
+      for (ParamsInfo paramsInfo : params) {
+        for (Token idToken : paramsInfo.idTokens) {
+          int currentScope = SymbolTable.getInstance().getCurrentScope();
+          if (SymbolTable.getInstance().putParameter(idToken.image, paramsInfo.varType, paramsInfo.parType) == null) {
+            LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+                idToken.beginLine, idToken.beginColumn, idToken.image);
+          }
+        }
       }
     }
   } catch (ParseException e) {
@@ -435,82 +458,72 @@ void cabecera_accion() :
   }
 }
 
-List<Symbol> parametros_formales() :
+List<ParamsInfo> parametros_formales() :
 {
-  List<Symbol> ids;
+  List<ParamsInfo> ids;
 }
 
 {
   try {
-    <tPAR_IZQ> ids = lista_parametros() <tPAR_DCHA> | {} {ids = new ArrayList<Symbol>();}
+    <tPAR_IZQ> ids = lista_parametros() <tPAR_DCHA> | {} {ids = new ArrayList<ParamsInfo>();}
   } catch (ParseException e) {
     recoverParsingError("parametros_formales", e);
-    ids = new ArrayList<Symbol>();
+    ids = new ArrayList<ParamsInfo>();
   }
   {return ids;}
 }
 
-List<Symbol> lista_parametros() :
+List<ParamsInfo> lista_parametros() :
 {
- List<Symbol> parSymbols;
- List<Symbol> parSymbolsRep;
+  List<ParamsInfo> paramsInfoList = new ArrayList<ParamsInfo>();
+  List<ParamsInfo> paramsInfoRepList;
+  ParamsInfo paramsInfo;
 }
 
 {
   try {
-    parSymbols = parametro() parSymbolsRep = repeticion_parametro() {parSymbols.addAll(parSymbolsRep);}
-    | {} {parSymbols = new ArrayList<Symbol>();}
+    paramsInfo = parametro() {paramsInfoList.add(paramsInfo);}
+    paramsInfoRepList = repeticion_parametro() {paramsInfoList.addAll(paramsInfoRepList);}
+    | {} {paramsInfoList = new ArrayList<ParamsInfo>();}
   } catch (ParseException e) {
     recoverParsingError("lista_parametros", e);
-    parSymbols = new ArrayList<Symbol>();
+    paramsInfoList = new ArrayList<ParamsInfo>();
   }
-  {return parSymbols;}
+  {return paramsInfoList;}
 }
 
-List<Symbol> parametro() :
+ParamsInfo parametro() :
 {
-  Symbol.ParameterType parType;
-  Symbol.VariableType varType;
-  List<Token> idTokens;
-  List<Symbol> parSymbols = new ArrayList<Symbol>();
+  ParamsInfo paramsInfo = new ParamsInfo();
 }
 
 {
   try {
-    parType = clase_parametros() varType = tipo_variables() idTokens = identificadores()
-    {
-      for (Token id : idTokens) {
-        Symbol parSymbol = SymbolTable.getInstance().putParameter(id.image, varType, parType);
-        if(parSymbol == null) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
-              id.beginLine, id.beginColumn, id.image);
-        } else {
-          parSymbols.add(parSymbol);
-        }
-      }
-    }
+    paramsInfo.parType = clase_parametros() paramsInfo.varType = tipo_variables() paramsInfo.idTokens = identificadores()
   } catch (ParseException e) {
     recoverParsingError("parametro", e);
-    parSymbols = new ArrayList<Symbol>();
+    paramsInfo = new ParamsInfo();
   }
-  {return parSymbols;}
+  {return paramsInfo;}
 }
 
-List<Symbol> repeticion_parametro() :
+List<ParamsInfo> repeticion_parametro() :
 {
-  List<Symbol> parSymbols;
-  List<Symbol> parSymbolsRep;
+  List<ParamsInfo> paramsInfoList = new ArrayList<ParamsInfo>();
+  List<ParamsInfo> paramsInfoRepList;
+  ParamsInfo paramsInfo;
 }
 
 {
   try {
-    <tPUNTOCOMA> parSymbols = parametro() parSymbolsRep = repeticion_parametro() {parSymbols.addAll(parSymbolsRep);}
-    | {} {parSymbols = new ArrayList<Symbol>();}
+    <tPUNTOCOMA> paramsInfo = parametro() {paramsInfoList.add(paramsInfo);}
+    paramsInfoRepList = repeticion_parametro() {paramsInfoList.addAll(paramsInfoRepList);}
+    | {} {paramsInfoList = new ArrayList<ParamsInfo>();}
   } catch (ParseException e) {
     recoverParsingError("repeticion_parametro", e);
-    parSymbols = new ArrayList<Symbol>();
+    paramsInfoList = new ArrayList<ParamsInfo>();
   }
-  {return parSymbols;}
+  {return paramsInfoList;}
 }
 
 Symbol.ParameterType clase_parametros() :
