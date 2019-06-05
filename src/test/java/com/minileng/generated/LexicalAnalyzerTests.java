@@ -77,6 +77,18 @@ public class LexicalAnalyzerTests {
     Assert.assertEquals(expectedOutput, stdOut.toString());
   }
 
+  @Test
+  public void thatWritingAnEmptyStringIsAnError() throws ParseException {
+    String p = "programa p;\n"
+        + "principio\n"
+        + "  escribir(\"\");\n"
+        + "fin\n";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expectedOutput = "ERROR LÉXICO (3, 12): símbolo no reconocido: \"\n";
+    Assert.assertEquals(expectedOutput, stdOut.toString());
+  }
+
   private static class ExpectedToken {
 
     int line;

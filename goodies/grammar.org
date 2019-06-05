@@ -48,10 +48,9 @@
      argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
      argumento_escribir : tKCADENA | expresion_bool ;
      lista_argumentos_vacia : expresion_bool repeticion_argumentos | ;
-     lista_argumentos_no_vacia : expresion_bool repeticion_argumentos ;
-     lista_argumentos_escribir : argumento_escribir repeticion_argumentos ;
+     lista_argumentos_escribir : argumento_escribir repeticion_argumentos_escribir ;
      repeticion_argumentos : tCOMA expresion_bool repeticion_argumentos | ;
-     repeticion_argumentos_escribir: tCOMA argumento_escribir repeticion_argumentos_escribir ;
+     repeticion_argumentos_escribir: tCOMA argumento_escribir repeticion_argumentos_escribir | ;
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT tPAR_IZQ tKCARACTER tPAR_DCHA | tCARAENT tPAR_IZQ entacar tPAR_DCHA | tCARAENT tPAR_IZQ tID tPAR_DCHA;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
@@ -107,10 +106,9 @@
      argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
      argumento_escribir : tKCADENA | expresion_bool ;
      lista_argumentos_vacia : expresion_bool repeticion_argumentos | ;
-     lista_argumentos_no_vacia : expresion_bool repeticion_argumentos ;
-     lista_argumentos_escribir : tKCADENA repeticion_argumentos | expresion_bool repeticion_argumentos ;
+     lista_argumentos_escribir : tKCADENA repeticion_argumentos_escribir | expresion_bool repeticion_argumentos_escribir ;
      repeticion_argumentos : tCOMA expresion_bool repeticion_argumentos | ;
-     repeticion_argumentos_escribir : tCOMA argumento_escribir repeticion_argumentos_escribir ;
+     repeticion_argumentos_escribir : tCOMA argumento_escribir repeticion_argumentos_escribir | ;
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT caraent' ;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;

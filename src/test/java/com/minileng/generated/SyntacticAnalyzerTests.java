@@ -39,19 +39,12 @@ public class SyntacticAnalyzerTests {
    * Test that no error is reported for some valid input files.
    */
   @Test
-  public void thatThereIsNoErrorsWhenSyntaxIsValid() {
+  public void thatThereIsNoErrorsWhenSyntaxIsValid() throws ParseException, FileNotFoundException {
     for (String f : VALID_SYNTAX_FILES) {
-      try {
         MiniLeng.ReInit(new FileReader(SyntacticAnalyzerTests.class.getResource(f).getFile()));
         MiniLeng.programa();
-      } catch (FileNotFoundException e) {
-        Assert.fail("File not found: " + f);
-      } catch (ParseException e) {
-        // The exception will never be thrown.
-        Assert.fail("Invalid syntax.");
-      }
+        Assert.assertEquals("", stdOut.toString());
     }
-    Assert.assertTrue(true);
   }
 
   /**

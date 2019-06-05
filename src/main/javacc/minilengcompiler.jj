@@ -15,6 +15,8 @@ import com.minileng.collections.KindNameMapping;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import com.minileng.codegen.CodeGenerator;
 import com.minileng.collections.TokenFreq;
 import com.minileng.exceptions.UnknownTokenException;
 import com.minileng.semantic.Symbol;
@@ -24,16 +26,21 @@ import org.apache.logging.log4j.Logger;
 
 public class MiniLeng {
 
-  /**
-   * Simple class is used to indicate if an expression is a constant (e.g., 3 + 3 + 4) and
-   * the value of that expression (e.g., 10) or if isn't a constant expression (e.g., 3 + id)
-   */
   private static class Constexpr {
     public boolean isConst;
     public int value;
+    public boolean isLValue;
+    public Symbol sym;
+    public boolean interpAsChar;
+    public Constexpr(boolean isConst, int value, boolean isLValue) {
+      this.isConst = isConst;
+      this.value = value;
+      this.isLValue = isLValue;
+    }
     public Constexpr(boolean isConst, int value) {
       this.isConst = isConst;
       this.value = value;
+      this.isLValue = false;
     }
     public Constexpr(boolean isConst) {
       this.isConst = isConst;
@@ -42,6 +49,7 @@ public class MiniLeng {
     public Constexpr() {
       this.isConst = false;
       this.value = -1;
+      this.isLValue = false;
     }
   }
 
@@ -51,9 +59,19 @@ public class MiniLeng {
     List<Token> idTokens;
   }
 
+  private static class IntWrapper {
+    int value;
+    public IntWrapper() {
+      value = 3;
+    }
+    public IntWrapper(int value) {
+      this.value = value;
+    }
+  }
+
   private static final Logger LOG = LogManager.getLogger();
 
-  public static String buildMessage(ParseException e) {
+  private static String buildMessage(ParseException e) {
     StringBuffer expected = new StringBuffer();
     int maxSize = 0;
     for (int i = 0; i < e.expectedTokenSequences.length; i++) {
@@ -98,7 +116,8 @@ public class MiniLeng {
     return retval;
   }
 
-  public static void recoverParsingError(String nonterminal, ParseException e) {
+  private static void recoverParsingError(String nonterminal, ParseException e) {
+    isThereAParsingError = true;
     LOG.info("ERROR SINTÁCTICO({}, {}): {}", e.currentToken.next.beginLine,
       e.currentToken.next.beginColumn, buildMessage(e));
     Set<String> followSet = FollowSets.getFollowSet(nonterminal);
@@ -107,7 +126,7 @@ public class MiniLeng {
     for (int i = 0; i < pos - 1; ++i) getNextToken();
   }
 
-  public static Symbol.VariableType toVariableType(int kind) {
+  private static Symbol.VariableType toVariableType(int kind) {
     Symbol.VariableType type;
     switch(kind) {
       case tENTERO:
@@ -145,7 +164,66 @@ public class MiniLeng {
     }
   }
 
-  public static int freeAddress = 3;
+  private static boolean isValidVariableOrParameter(Token id) {
+    Symbol sym = SymbolTable.getInstance().get(id.image);
+    if (sym == null) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+          id.beginColumn, id.image);
+      return false;
+    } else if (sym.getSymbolType() != Symbol.SymbolType.VARIABLE && sym.getSymbolType() != Symbol.SymbolType.PARAMETER) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
+          id.beginLine, id.beginColumn, id.image);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private static boolean isValidAction(Token id, int numArgs) {
+    Symbol sym = SymbolTable.getInstance().get(id.image);
+    if (sym == null) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
+          id.beginColumn, id.image);
+      return false;
+    } else if (sym.getSymbolType() != Symbol.SymbolType.ACTION) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
+          id.beginLine, id.beginColumn, id.image);
+      return false;
+    } else if (sym.getParameterList().size() != numArgs) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): Número de argumentos ({}) es distinto al número de"
+        + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
+        sym.getParameterList().size(), id.image);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private static void genExpDrf(Constexpr constexpr) {
+    if (constexpr.isLValue) {
+      gen.drf();
+      if (constexpr.sym != null && constexpr.sym.isReference()) {
+        gen.drf();
+      }
+    }
+  }
+
+  public static boolean wasThereAnError() {
+    return isThereAParsingError || isThereASemanticError;
+  }
+
+  public static String getCodeAsString() {
+    return gen.toString();
+  }
+
+  public static void writeCodeToFile(String filename) throws IOException {
+    gen.writeToFile(filename);
+  }
+
+  private static CodeGenerator gen = new CodeGenerator();
+  private static boolean isThereAParsingError = false;
+  private static boolean isThereASemanticError = false;
+
 }
 
 PARSER_END(MiniLeng)
@@ -290,14 +368,27 @@ TOKEN :
 void programa() :
 {
   Token p;
+  String mainLabel;
+  IntWrapper freeAddress = new IntWrapper();
 }
 
 {
   try {
+    {
+      isThereAParsingError = false;
+      isThereASemanticError = false;
+      gen.reinit();
+      mainLabel = gen.newLabel();
+      gen.enp(mainLabel);
+    }
     <tPROGRAMA> { SymbolTable.getInstance().openScope(); }
     p = <tID> { SymbolTable.getInstance().putProgram(p.image); }
-    <tPUNTOCOMA> declaracion_variables() declaracion_acciones() bloque_sentencias() <EOF>
-    { SymbolTable.getInstance().closeScope(); }
+    <tPUNTOCOMA> declaracion_variables(freeAddress) declaracion_acciones()
+    {gen.insertLabel(mainLabel);} bloque_sentencias(freeAddress) <EOF>
+    {
+      SymbolTable.getInstance().closeScope();
+      gen.lvp();
+    }
   } catch (UnknownTokenException e) {
     LOG.info(e.getMessage());
   } catch (ParseException e) {
@@ -305,19 +396,19 @@ void programa() :
   }
 }
 
-void declaracion_variables() :
+void declaracion_variables(IntWrapper addr) :
 {
 }
 
 {
   try {
-    declaracion() <tPUNTOCOMA> declaracion_variables() | {}
+    declaracion(addr) <tPUNTOCOMA> declaracion_variables(addr) | {}
   } catch (ParseException e) {
     recoverParsingError("declaracion_variables", e);
   }
 }
 
-void declaracion() :
+void declaracion(IntWrapper addr) :
 {
   Symbol.VariableType variableType;
   List<Token> tokens;
@@ -328,7 +419,7 @@ void declaracion() :
     variableType = tipo_variables() tokens = identificadores()
     {
       for (Token id : tokens) {
-          if(null == SymbolTable.getInstance().putVariable(id.image, variableType, freeAddress++)) {
+          if(null == SymbolTable.getInstance().putVariable(id.image, variableType, addr.value++)) {
             LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
                 id.beginLine, id.beginColumn, id.image);
           }
@@ -362,7 +453,8 @@ List<Token> identificadores() :
 
 {
   try {
-    id = <tID> {tokens.add(id);} tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
+    id = <tID> {tokens.add(id);}
+    tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
   } catch (ParseException e) {
     recoverParsingError("identificadores", e);
     tokens = new ArrayList<Token>();
@@ -379,7 +471,8 @@ List<Token> repeticion_identificadores() :
 
 {
   try {
-    <tCOMA> id = <tID> {tokens.add(id);} tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
+    <tCOMA> id = <tID> {tokens.add(id);}
+    tokensRep = repeticion_identificadores() {tokens.addAll(tokensRep);}
     | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_identificadores", e);
@@ -402,13 +495,15 @@ void declaracion_acciones() :
 
 void declaracion_accion() :
 {
+  IntWrapper addr = new IntWrapper();
 }
 
 {
   try {
-    cabecera_accion() <tPUNTOCOMA> declaracion_variables() declaracion_acciones()
-    bloque_sentencias()
+    cabecera_accion(addr) <tPUNTOCOMA> declaracion_variables(addr)
+    declaracion_acciones() bloque_sentencias(addr)
     {
+      gen.csf();
       SymbolTable.getInstance().closeScope();
     }
   } catch (ParseException e) {
@@ -416,10 +511,11 @@ void declaracion_accion() :
   }
 }
 
-void cabecera_accion() :
+void cabecera_accion(IntWrapper addr) :
 {
   List<ParamsInfo> params;
   Token actionId = null;
+  int currentScope = SymbolTable.getInstance().getCurrentScope();
 }
 
 {
@@ -429,28 +525,34 @@ void cabecera_accion() :
       List<Symbol> paramSyms = new ArrayList<Symbol>();
       for (ParamsInfo paramsInfo : params) {
         for (Token idToken : paramsInfo.idTokens) {
-          int currentScope = SymbolTable.getInstance().getCurrentScope();
-          Symbol param = Symbol.buildParameter(idToken.image, paramsInfo.varType, paramsInfo.parType, currentScope + 1);
+          // The scope and the address doesn't really matter here
+          Symbol param = Symbol.buildParameter(idToken.image, paramsInfo.varType,
+              paramsInfo.parType, currentScope + 1, addr.value++);
           paramSyms.add(param);
         }
       }
-      if(null == SymbolTable.getInstance().putAction(actionId.image, paramSyms)) {
+      if(null == SymbolTable.getInstance().putAction(actionId.image, paramSyms,
+          gen.getInstrCount())) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
       }
       SymbolTable.getInstance().openScope();
-      if(null == SymbolTable.getInstance().putAction(actionId.image, paramSyms)) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
-            actionId.beginLine, actionId.beginColumn, actionId.image);
-      }
-      for (ParamsInfo paramsInfo : params) {
-        for (Token idToken : paramsInfo.idTokens) {
-          int currentScope = SymbolTable.getInstance().getCurrentScope();
-          if (SymbolTable.getInstance().putParameter(idToken.image, paramsInfo.varType, paramsInfo.parType) == null) {
-            LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
-                idToken.beginLine, idToken.beginColumn, idToken.image);
+      {
+        int i = 0;
+        for (ParamsInfo paramsInfo : params) {
+          for (Token idToken : paramsInfo.idTokens) {
+            if (SymbolTable.getInstance().putSymbol(paramSyms.get(i++)) == null) {
+              LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
+                  idToken.beginLine, idToken.beginColumn, idToken.image);
+            }
           }
         }
+      }
+      gen.comment("Accion: " + actionId.image);
+      for (int i = paramSyms.size() - 1; i >= 0; --i) {
+        Symbol s = paramSyms.get(i);
+        gen.srf(0, s.getAddress());
+        gen.asgi();
       }
     }
   } catch (ParseException e) {
@@ -465,7 +567,8 @@ List<ParamsInfo> parametros_formales() :
 
 {
   try {
-    <tPAR_IZQ> ids = lista_parametros() <tPAR_DCHA> | {} {ids = new ArrayList<ParamsInfo>();}
+    <tPAR_IZQ> ids = lista_parametros() <tPAR_DCHA>
+    | {} {ids = new ArrayList<ParamsInfo>();}
   } catch (ParseException e) {
     recoverParsingError("parametros_formales", e);
     ids = new ArrayList<ParamsInfo>();
@@ -483,7 +586,8 @@ List<ParamsInfo> lista_parametros() :
 {
   try {
     paramsInfo = parametro() {paramsInfoList.add(paramsInfo);}
-    paramsInfoRepList = repeticion_parametro() {paramsInfoList.addAll(paramsInfoRepList);}
+    paramsInfoRepList = repeticion_parametro()
+    {paramsInfoList.addAll(paramsInfoRepList);}
     | {} {paramsInfoList = new ArrayList<ParamsInfo>();}
   } catch (ParseException e) {
     recoverParsingError("lista_parametros", e);
@@ -499,7 +603,9 @@ ParamsInfo parametro() :
 
 {
   try {
-    paramsInfo.parType = clase_parametros() paramsInfo.varType = tipo_variables() paramsInfo.idTokens = identificadores()
+    paramsInfo.parType = clase_parametros()
+    paramsInfo.varType = tipo_variables()
+    paramsInfo.idTokens = identificadores()
   } catch (ParseException e) {
     recoverParsingError("parametro", e);
     paramsInfo = new ParamsInfo();
@@ -541,49 +647,51 @@ Symbol.ParameterType clase_parametros() :
   {return parameterType;}
 }
 
-void bloque_sentencias() :
+void bloque_sentencias(IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    <tPRINCIPIO> lista_sentencias() <tFIN>
+    <tPRINCIPIO> lista_sentencias(freeAddress) <tFIN>
   } catch (ParseException e) {
     recoverParsingError("bloque_sentencias", e);
   }
 }
 
-void lista_sentencias() :
+void lista_sentencias(IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    sentencia() repeticion_lista_sentencias()
+    sentencia(freeAddress) repeticion_lista_sentencias(freeAddress)
   } catch (ParseException e) {
     recoverParsingError("lista_sentencias", e);
   }
 }
 
-void repeticion_lista_sentencias() :
+void repeticion_lista_sentencias(IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    sentencia() repeticion_lista_sentencias() | {}
+    sentencia(freeAddress) repeticion_lista_sentencias(freeAddress) | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_lista_sentencias", e);
   }
 }
 
-void sentencia() :
+void sentencia(IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA> | asignacion_invocacion() | seleccion() | mientras_que() | <tPUNTOCOMA>
+    leer() <tPUNTOCOMA> | escribir() <tPUNTOCOMA>
+    | asignacion_invocacion(freeAddress) | seleccion(freeAddress)
+    | mientras_que(freeAddress) | <tPUNTOCOMA>
   } catch (ParseException e) {
     recoverParsingError("sentencia", e);
   }
@@ -599,9 +707,13 @@ void leer() :
     <tLEER> <tPAR_IZQ> idTokens = identificadores()
     {
       for (Token id : idTokens) {
-        if (SymbolTable.getInstance().get(id.image) == null) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-              id.beginColumn, id.image);
+        Symbol symId = SymbolTable.getInstance().get(id.image);
+        if (isValidVariableOrParameter(id)) {
+          gen.srf(0, symId.getAddress());
+          if (symId.isReference()) {
+            gen.drf();
+          }
+          gen.rd(symId.getVariableType() == Symbol.VariableType.INT);
         }
       }
     }
@@ -623,27 +735,20 @@ void escribir() :
   }
 }
 
-void asignacion_invocacion() :
+void asignacion_invocacion(IntWrapper freeAddress) :
 {
   Token id;
 }
 
 {
   try {
-    id = <tID>
-    {
-      if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-            id.beginColumn, id.image);
-      }
-    }
-    asignacion_invocacion_(id)
+    id = <tID> asignacion_invocacion_(id, freeAddress)
   } catch (ParseException e) {
     recoverParsingError("asignacion_invocacion", e);
   }
 }
 
-void asignacion_invocacion_(Token id) :
+void asignacion_invocacion_(Token id, IntWrapper freeAddress) :
 {
   int numArgs;
   Symbol idSym = SymbolTable.getInstance().get(id.image);
@@ -651,26 +756,21 @@ void asignacion_invocacion_(Token id) :
 
 {
   try {
+    // TODO: put the calls to asignacion() and invocacion_accion() after checking the id symbol not before
     asignacion()
     {
-      if (idSym != null) {
-        if (idSym.getSymbolType() != Symbol.SymbolType.VARIABLE && idSym.getSymbolType() != Symbol.SymbolType.PARAMETER) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
-                      id.beginLine, id.beginColumn, id.image);
+      if (isValidVariableOrParameter(id)) {
+        int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
+        gen.srf(frame, idSym.getAddress());
+        if (idSym.isReference()) {
+          gen.drf();
         }
+        gen.asgi();
       }
     }
-    | numArgs = invocacion_accion()
+    | numArgs = invocacion_accion(freeAddress, idSym)
     {
-      if (idSym != null) {
-        if (idSym.getSymbolType() != Symbol.SymbolType.ACTION) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
-              id.beginLine, id.beginColumn, id.image);
-        } else if (idSym.getParameterList().size() != numArgs) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): Número de argumentos ({}) es distinto al número de"
-              + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
-              idSym.getParameterList().size(), id.image);
-        }
+      if (isValidAction(id, numArgs)) {
       }
     }
   } catch (ParseException e) {
@@ -680,24 +780,36 @@ void asignacion_invocacion_(Token id) :
 
 void asignacion() :
 {
+  Constexpr constexpr;
 }
 
 {
   try {
-    <tOPAS> expresion_bool() <tPUNTOCOMA>
+    <tOPAS> constexpr = expresion_bool()
+    {
+      genExpDrf(constexpr);
+    }
+    <tPUNTOCOMA>
   } catch (ParseException e) {
     recoverParsingError("asignacion", e);
   }
 }
 
-int invocacion_accion() :
+int invocacion_accion(IntWrapper freeAddress, Symbol actionSym) :
 {
   int numArgs;
 }
 
 {
   try {
-    numArgs = argumentos_accion() <tPUNTOCOMA>
+    numArgs = argumentos_accion(freeAddress, actionSym) <tPUNTOCOMA>
+    {
+      if (actionSym != null && actionSym.isAction()) {
+        gen.osf(freeAddress.value,
+            SymbolTable.getInstance().getCurrentScope() - actionSym.getScope(),
+            actionSym.getAddress());
+      }
+    }
   } catch (ParseException e) {
     recoverParsingError("invocacion_accion", e);
     numArgs = 0;
@@ -705,38 +817,50 @@ int invocacion_accion() :
   {return numArgs;}
 }
 
-void mientras_que() :
+void mientras_que(IntWrapper freeAddress) :
 {
+  String startLoopLabel;
+  String endLoopLabel;
+  Constexpr constexpr;
 }
 
 {
   try {
-    <tMQ> expresion_bool() lista_sentencias() <tFMQ>
+    <tMQ> {startLoopLabel = gen.newLabel(); gen.insertLabel(startLoopLabel);}
+    constexpr = expresion_bool()
+    {
+      genExpDrf(constexpr);
+      endLoopLabel = gen.newLabel();
+      gen.jmf(endLoopLabel);
+    }
+    lista_sentencias(freeAddress) {gen.jmp(startLoopLabel);}
+    <tFMQ> {gen.insertLabel(endLoopLabel);}
   } catch (ParseException e) {
     recoverParsingError("mientras_que", e);
   }
 }
 
-void seleccion() :
+void seleccion(IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    <tSI> seleccion_()
+    <tSI> seleccion_(freeAddress)
   } catch (ParseException e) {
     recoverParsingError("seleccion", e);
   }
 }
 
-int argumentos_accion() :
+int argumentos_accion(IntWrapper freeAddress, Symbol actionSym) :
 {
   int numArgs = 0;
 }
 
 {
   try {
-    <tPAR_IZQ> numArgs = lista_argumentos_vacia() <tPAR_DCHA> | {}
+    <tPAR_IZQ> numArgs = lista_argumentos_vacia(freeAddress, actionSym)
+    <tPAR_DCHA> | {}
   } catch (ParseException e) {
     recoverParsingError("argumentos_accion", e);
     numArgs = 0;
@@ -746,74 +870,132 @@ int argumentos_accion() :
 
 void argumento_escribir() :
 {
+  Token tCadena;
+  Constexpr constexpr;
 }
 
 {
   try {
-    <tKCADENA> | expresion_bool()
+    tCadena = <tKCADENA>
+    {
+//      for (int i = tCadena.image.length() - 1; i >= 0; --i) {
+//        gen.stc(tCadena.image.charAt(i));
+//        gen.wrt(false);
+//      }
+      for (int i = 1; i < tCadena.image.length() - 1; ++i) {
+        gen.stc(tCadena.image.charAt(i));
+        gen.wrt(false);
+      }
+    }
+    | constexpr = expresion_bool()
+    {genExpDrf(constexpr); gen.wrt(!constexpr.interpAsChar);}
   } catch (ParseException e) {
     recoverParsingError("argumento_escribir", e);
   }
 }
 
-int lista_argumentos_vacia() :
+int lista_argumentos_vacia(IntWrapper freeAddress, Symbol actionSym) :
 {
-  int numArgs = 1;
-  int numArgsRep = 0;
+  Constexpr constexpr;
+  IntWrapper argPos = new IntWrapper(0);
 }
 
 {
   try {
-    expresion_bool() numArgsRep = repeticion_argumentos() | {} {numArgs = 0; numArgsRep = 0;}
+    constexpr = expresion_bool()
+    {
+      if (actionSym != null && actionSym.isAction()) {
+        List<Symbol> params = actionSym.getParameterList();
+        if (argPos.value < params.size()) {
+          Symbol param = params.get(argPos.value);
+          if (!constexpr.isLValue) {
+            if (param.isReference()) {
+              gen.srf(0, freeAddress.value);
+              gen.asgi();
+              gen.srf(0, freeAddress.value++);
+            }
+          } else {
+            if (constexpr.sym.isReference()) {
+              gen.drf();
+            }
+            if (!param.isReference()) {
+              gen.drf();
+            }
+          }
+        }
+      }
+    }
+    repeticion_argumentos(freeAddress, actionSym, argPos) | {}
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_vacia", e);
     return 0;
   }
-  {numArgs += numArgsRep; return numArgs;}
-}
-
-int lista_argumentos_no_vacia() :
-{
-  int numArgs = 1;
-  int numArgsRep = 0;
-}
-
-{
-  try {
-    expresion_bool() numArgsRep = repeticion_argumentos()
-  } catch (ParseException e) {
-    recoverParsingError("lista_argumentos_no_vacia", e);
-    return 0;
-  }
-  {numArgs += numArgsRep; return numArgs;}
+  {return argPos.value + 1;}
 }
 
 void lista_argumentos_escribir() :
 {
+  Token tCadena;
+  Constexpr constexpr;
 }
 
 {
   try {
-    <tKCADENA> repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+    tCadena = <tKCADENA>
+    {
+//      for (int i = tCadena.image.length() - 1; i >= 0; --i) {
+//        gen.stc(tCadena.image.charAt(i));
+//        gen.wrt(false);
+//      }
+      for (int i = 1; i < tCadena.image.length() - 1; ++i) {
+        gen.stc(tCadena.image.charAt(i));
+        gen.wrt(false);
+      }
+    }
+    repeticion_argumentos_escribir()
+    | constexpr = expresion_bool() {genExpDrf(constexpr); gen.wrt(!constexpr.interpAsChar);}
+    repeticion_argumentos_escribir()
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_escribir", e);
   }
 }
 
-int repeticion_argumentos() :
+void repeticion_argumentos(IntWrapper freeAddress, Symbol actionSym,
+    IntWrapper argPos) :
 {
-  int numArgs = 0;
-  int numArgsRep;
+  Constexpr constexpr;
 }
 
 {
   try {
-    <tCOMA> expresion_bool() {++numArgs;} numArgsRep = repeticion_argumentos() {numArgs += numArgsRep;} | {}
+    <tCOMA> constexpr = expresion_bool()
+    {
+      argPos.value++;
+      if (actionSym != null && actionSym.isAction()) {
+        List<Symbol> params = actionSym.getParameterList();
+        if (argPos.value < params.size()) {
+          Symbol param = params.get(argPos.value);
+          if (!constexpr.isLValue) {
+            if (param.isReference()) {
+              gen.srf(0, freeAddress.value);
+              gen.asgi();
+              gen.srf(0, freeAddress.value++);
+            }
+          } else {
+            if (constexpr.sym.isReference()) {
+              gen.drf();
+            }
+            if (!param.isReference()) {
+              gen.drf();
+            }
+          }
+        }
+      }
+    }
+    repeticion_argumentos(freeAddress, actionSym, argPos) | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_argumentos", e);
-    numArgs = 0;
   }
-  {return numArgs;}
 }
 
 void repeticion_argumentos_escribir() :
@@ -822,7 +1004,7 @@ void repeticion_argumentos_escribir() :
 
 {
   try {
-    <tCOMA> argumento_escribir() repeticion_argumentos_escribir()
+    <tCOMA> argumento_escribir() repeticion_argumentos_escribir() | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_argumentos_escribir", e);
   }
@@ -835,7 +1017,8 @@ Token operador_relacional() :
 
 {
   try {
-    t = <tMAYOR> | t = <tMENOR> | t = <tIGUAL> | t = <tMAI> | t = <tMEI> | t = <tNI>
+    t = <tMAYOR> | t = <tMENOR> | t = <tIGUAL> | t = <tMAI> | t = <tMEI>
+    | t = <tNI>
   } catch (ParseException e) {
     recoverParsingError("operador_relacional", e);
   }
@@ -864,6 +1047,8 @@ Constexpr entacar() :
   try {
     t = <tENTACAR> <tPAR_IZQ> constexpr = expresion_bool()
     {
+      genExpDrf(constexpr);
+      constexpr.interpAsChar = true;
       if (constexpr.isConst && (constexpr.value < 0 || constexpr.value > 255)) {
         LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
             + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
@@ -884,7 +1069,8 @@ Constexpr expresion_bool() :
 
 {
   try {
-    constexprTermBool = term_bool() constexprExpresionBool = expresion_bool_(constexprTermBool)
+    constexprTermBool = term_bool()
+    constexprExpresionBool = expresion_bool_(constexprTermBool)
   } catch (ParseException e) {
     recoverParsingError("expresion_bool", e);
   }
@@ -913,7 +1099,13 @@ Constexpr factor_bool_unario() :
 
 {
   try {
-    <tNOT> constexpr = factor_bool() {constexpr.value = constexpr.value != 0 ? 0 : 1;}
+    <tNOT> constexpr = factor_bool()
+    {
+      constexpr.value = constexpr.value != 0 ? 0 : 1;
+      genExpDrf(constexpr);
+      constexpr.isLValue = false;
+      gen.ngb();
+    }
     | constexpr = factor_bool()
   } catch (ParseException e) {
     recoverParsingError("factor_bool_unario", e);
@@ -928,8 +1120,18 @@ Constexpr factor_bool() :
 
 {
   try {
-    <tFALSE> {constexpr.isConst = true; constexpr.value = 0;}
-    | <tTRUE> {constexpr.isConst = true; constexpr.value = 1;}
+    <tFALSE>
+    {
+      constexpr.isConst = true;
+      constexpr.value = 0;
+      gen.stc(0);
+    }
+    | <tTRUE>
+    {
+      constexpr.isConst = true;
+      constexpr.value = 1;
+      gen.stc(1);
+    }
     | constexpr = relacion()
   } catch (ParseException e) {
     recoverParsingError("factor_bool", e);
@@ -939,18 +1141,17 @@ Constexpr factor_bool() :
 
 Constexpr relacion() :
 {
-  Constexpr constexpr = new Constexpr();
   Constexpr expr = new Constexpr();
   Constexpr rel = new Constexpr();
 }
 
 {
   try {
-    expr = expresion_arit() rel = relacion_(expr) {constexpr = rel;}
+    expr = expresion_arit() rel = relacion_(expr)
   } catch (ParseException e) {
     recoverParsingError("relacion", e);
   }
-  {return constexpr;}
+  {return rel;}
 }
 
 Constexpr expresion_arit() :
@@ -992,8 +1193,15 @@ Constexpr factor_arit_unario() :
 
 {
   try {
-    <tMAS> constexpr = factor_arit()
-    | <tMENOS> constexpr = factor_arit() {constexpr.value = -1 * constexpr.value;}
+    <tMAS> constexpr = factor_arit() {constexpr.interpAsChar = false;}
+    | <tMENOS> constexpr = factor_arit()
+    {
+      constexpr.value = -1 * constexpr.value;
+      constexpr.isLValue = false;
+      constexpr.interpAsChar = false;
+      genExpDrf(constexpr);
+      gen.ngi();
+    }
     | constexpr = factor_arit()
   } catch (ParseException e) {
     recoverParsingError("factor_arit_unario", e);
@@ -1009,17 +1217,31 @@ Constexpr factor_arit() :
 
 {
   try {
-    id = <tKENTERO> {constexpr.isConst = true; constexpr.value = Integer.valueOf(id.image);}
+    id = <tKENTERO>
+    {
+      constexpr.isConst = true;
+      constexpr.value = Integer.valueOf(id.image);
+      gen.stc(constexpr.value);
+    }
     | id = <tID>
     {
-      Symbol sym = SymbolTable.getInstance().get(id.image);
-      if (sym == null) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-            id.beginColumn, id.image);
+      Symbol symId = SymbolTable.getInstance().get(id.image);
+      if (isValidVariableOrParameter(id)) {
+        constexpr.isLValue = true;
+        constexpr.sym = symId;
+        constexpr.interpAsChar = symId.getVariableType() == Symbol.VariableType.CHAR;
+        gen.srf(SymbolTable.getInstance().getCurrentScope() - symId.getScope(),
+            symId.getAddress());
       }
     }
-    | id = <tKCARACTER> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
-    | <tPAR_IZQ> constexpr = expresion_bool() <tPAR_DCHA>
+    | id = <tKCARACTER>
+    {
+      constexpr.isConst = true;
+      constexpr.value = id.image.charAt(1);
+      constexpr.interpAsChar = true;
+      gen.stc(constexpr.value);
+    }
+    | <tPAR_IZQ> constexpr = expresion_bool() {genExpDrf(constexpr);} <tPAR_DCHA>
     | constexpr = entacar()
     | <tCARAENT> constexpr = factor_arit_()
   } catch (ParseException e) {
@@ -1037,7 +1259,9 @@ Constexpr expresion_bool_(Constexpr inherit) :
 
 {
   try {
-    <tOR> term = term_bool() exp = expresion_bool_(term)
+    <tOR> {genExpDrf(inherit);}
+    term = term_bool() {genExpDrf(term); gen.or();}
+    exp = expresion_bool_(term)
     {
       constexpr.isConst = inherit.isConst && exp.isConst;
       constexpr.value = (inherit.value != 0) || (exp.value != 0) ? 1 : 0;
@@ -1058,7 +1282,10 @@ Constexpr term_bool_(Constexpr inherit) :
 
 {
   try {
-    <tAND> factor = factor_bool_unario() term = term_bool_(factor)
+    <tAND> {genExpDrf(inherit);}
+    factor = factor_bool_unario()
+    {genExpDrf(factor); gen.and();}
+    term = term_bool_(factor)
     {
       constexpr.isConst = inherit.isConst && term.isConst;
       constexpr.value = (inherit.value != 0) && (term.value != 0) ? 1 : 0;
@@ -1079,12 +1306,17 @@ Constexpr expresion_arit_(Constexpr inherit) :
 
 {
   try {
-    <tMAS> term = term_arit() exp = expresion_arit_(term)
+    <tMAS> {genExpDrf(inherit);}
+    term = term_arit() {genExpDrf(term); gen.plus();}
+    exp = expresion_arit_(term)
     {
       constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
       constexpr.value = inherit.value + exp.value;
     }
-    | <tMENOS> term = term_arit() exp = expresion_arit_(term)
+    | <tMENOS> {genExpDrf(inherit);}
+    term = term_arit()
+    {genExpDrf(term); gen.sbt();}
+    exp = expresion_arit_(term)
     {
       constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
       constexpr.value = inherit.value - exp.value;
@@ -1106,7 +1338,10 @@ Constexpr term_arit_(Constexpr inherit) :
 
 {
   try {
-    <tMUL> factor = factor_arit_unario() term = term_arit_(factor)
+    <tMUL> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {genExpDrf(factor); gen.tms();}
+    term = term_arit_(factor)
     {
       if (inherit.isConst && factor.isConst) {
         constexpr.isConst = true;
@@ -1117,7 +1352,10 @@ Constexpr term_arit_(Constexpr inherit) :
         constexpr.value = 0;
       }
     }
-    | t = <tDIV> factor = factor_arit_unario() term = term_arit_(factor)
+    | t = <tDIV> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {genExpDrf(factor); gen.div();}
+    term = term_arit_(factor)
     {
       if (term.isConst) {
         if (term.value == 0) {
@@ -1128,7 +1366,10 @@ Constexpr term_arit_(Constexpr inherit) :
         }
       }
     }
-    | t = <tDIVCHAR> factor = factor_arit_unario() term = term_arit_(factor)
+    | t = <tDIVCHAR> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {genExpDrf(factor); gen.div();}
+    term = term_arit_(factor)
     {
       if (term.isConst) {
         if (term.value == 0) {
@@ -1139,7 +1380,10 @@ Constexpr term_arit_(Constexpr inherit) :
         }
       }
     }
-    | t = <tMOD> factor = factor_arit_unario() term = term_arit_(factor)
+    | t = <tMOD> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {genExpDrf(factor); gen.mod();}
+    term = term_arit_(factor)
     {
       if (term.isConst && term.value == 0) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
@@ -1155,13 +1399,19 @@ Constexpr term_arit_(Constexpr inherit) :
   {return constexpr;}
 }
 
-void seleccion_() :
+void seleccion_(IntWrapper freeAddress) :
 {
+  Constexpr constexpr;
 }
-
 {
   try {
-    expresion_bool() seleccion__()
+    constexpr = expresion_bool()
+    {
+      genExpDrf(constexpr);
+      String labelFalse = gen.newLabel();
+      gen.jmf(labelFalse);
+    }
+    seleccion__(labelFalse, freeAddress)
   } catch (ParseException e) {
     recoverParsingError("seleccion_", e);
   }
@@ -1190,10 +1440,36 @@ Constexpr relacion_(Constexpr inherit) :
 
 {
   try {
-    op = operador_relacional() exp = expresion_arit()
+    op = operador_relacional() {genExpDrf(inherit);}
+    exp = expresion_arit()
     {
+      genExpDrf(exp);
       constexpr.value = relation(op, inherit.value, exp.value) ? 1 : 0;
       constexpr.isConst = inherit.isConst && exp.isConst;
+      if (!constexpr.isConst) {
+        switch (op.kind ) {
+          case tMAYOR:
+            gen.gt();
+            break;
+          case tMENOR:
+            gen.lt();
+            break;
+          case tIGUAL:
+            gen.eq();
+            break;
+          case tMAI:
+            gen.gte();
+            break;
+          case tMEI:
+            gen.lte();
+            break;
+          case tNI:
+            gen.neq();
+            break;
+          default:
+            gen.nop();
+        }
+      }
     }
     | {} {constexpr = inherit;}
   } catch (ParseException e) {
@@ -1216,13 +1492,13 @@ Constexpr factor_arit_() :
   {return constexpr;}
 }
 
-void seleccion__() :
+void seleccion__(String labelFalse, IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    <tENT> seleccion___()
+    <tENT> seleccion___(labelFalse, freeAddress)
   } catch (ParseException e) {
     recoverParsingError("seleccion__", e);
   }
@@ -1236,13 +1512,23 @@ Constexpr caraent__() :
 
 {
   try {
-    id = <tKCARACTER> <tPAR_DCHA> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
+    id = <tKCARACTER> <tPAR_DCHA>
+    {
+      constexpr.isConst = true;
+      constexpr.value = id.image.charAt(1);
+      gen.stc(id.image.charAt(1));
+    }
     | constexpr = entacar() <tPAR_DCHA>
     | id = <tID>
     {
-      if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-            id.beginColumn, id.image);
+      Symbol symId = SymbolTable.getInstance().get(id.image);
+      if (isValidVariableOrParameter(id)) {
+        gen.srf(SymbolTable.getInstance().getCurrentScope() - symId.getScope(),
+            symId.getAddress());
+        gen.drf();
+        if (symId.isReference()) {
+          gen.drf();
+        }
       }
     }
     <tPAR_DCHA>
@@ -1260,13 +1546,23 @@ Constexpr factor_arit__() :
 
 {
   try {
-    id = <tKCARACTER> <tPAR_DCHA> {constexpr.isConst = true; constexpr.value = id.image.charAt(0);}
+    id = <tKCARACTER> <tPAR_DCHA>
+    {
+      constexpr.isConst = true;
+      constexpr.value = id.image.charAt(1);
+      gen.stc(id.image.charAt(1));
+    }
     | constexpr = entacar() <tPAR_DCHA>
     | id = <tID>
     {
-      if (SymbolTable.getInstance().get(id.image) == null) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-            id.beginColumn, id.image);
+      Symbol sym = SymbolTable.getInstance().get(id.image);
+      if (isValidVariableOrParameter(id)) {
+        gen.srf(SymbolTable.getInstance().getCurrentScope() - sym.getScope(),
+            sym.getAddress());
+        gen.drf();
+        if (sym.isReference()) {
+          gen.drf();
+        }
       }
     }
     <tPAR_DCHA>
@@ -1276,25 +1572,28 @@ Constexpr factor_arit__() :
   {return constexpr;}
 }
 
-void seleccion___() :
+void seleccion___(String labelFalse, IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    lista_sentencias() seleccion____()
+    lista_sentencias(freeAddress) seleccion____(labelFalse, freeAddress)
   } catch (ParseException e) {
     recoverParsingError("seleccion___", e);
   }
 }
 
-void seleccion____() :
+void seleccion____(String labelFalse, IntWrapper freeAddress) :
 {
 }
 
 {
   try {
-    <tFSI> | <tSI_NO> lista_sentencias() <tFSI>
+    <tFSI> {gen.insertLabel(labelFalse);}
+    | {String l = gen.newLabel(); gen.jmp(l);}
+    <tSI_NO> {gen.insertLabel(labelFalse);} lista_sentencias(freeAddress)
+    <tFSI> {gen.insertLabel(l);}
   } catch (ParseException e) {
     recoverParsingError("seleccion____", e);
   }

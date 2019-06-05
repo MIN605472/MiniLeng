@@ -29,7 +29,7 @@ public class Symbol {
    * @return the parameter symbol with the specified values
    */
   public static Symbol buildParameter(String name, VariableType variableType,
-      ParameterType parameterType, int scope) {
+      ParameterType parameterType, int scope, int address) {
     if (name == null || variableType == null || parameterType == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -39,6 +39,7 @@ public class Symbol {
     symbol.parameterType = parameterType;
     symbol.scope = scope;
     symbol.symbolType = SymbolType.PARAMETER;
+    symbol.address = address;
     return symbol;
   }
 
@@ -50,7 +51,8 @@ public class Symbol {
    * @param scope the scope of the symbol
    * @return the variable symbol with the specified values
    */
-  public static Symbol buildVariable(String name, VariableType variableType, int scope, int address) {
+  public static Symbol buildVariable(String name, VariableType variableType, int scope,
+      int address) {
     if (name == null || variableType == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -89,7 +91,8 @@ public class Symbol {
    * @param scope the scope of the symbol
    * @return the action symbol with the specified values
    */
-  public static Symbol buildAction(String name, List<Symbol> parameterList, int scope) {
+  public static Symbol buildAction(String name, List<Symbol> parameterList, int scope,
+      int address) {;
     if (name == null || parameterList == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -98,6 +101,7 @@ public class Symbol {
     symbol.parameterList = parameterList;
     symbol.scope = scope;
     symbol.symbolType = SymbolType.ACTION;
+    symbol.address = address;
     return symbol;
   }
 

@@ -45,14 +45,17 @@ public class SymbolTable {
     if (l == null) {
       return null;
     }
-    if (l.isEmpty()) {
-      return null;
+    for (Symbol s : l) {
+      if (s.getName().equals(name)) {
+        return s;
+      }
     }
-    return l.get(0);
+    return null;
   }
 
-  public Symbol putParameter(String name, VariableType variableType, ParameterType parameterType) {
-    return put(Symbol.buildParameter(name, variableType, parameterType, currentScope));
+  public Symbol putParameter(String name, VariableType variableType, ParameterType parameterType,
+      int address) {
+    return put(Symbol.buildParameter(name, variableType, parameterType, currentScope, address));
   }
 
   public Symbol putVariable(String name, VariableType variableType, int address) {
@@ -63,8 +66,8 @@ public class SymbolTable {
     return put(Symbol.buildProgram(name, currentScope));
   }
 
-  public Symbol putAction(String name, List<Symbol> parameterList) {
-    return put(Symbol.buildAction(name, parameterList, currentScope));
+  public Symbol putAction(String name, List<Symbol> parameterList, int address) {
+    return put(Symbol.buildAction(name, parameterList, currentScope, address));
   }
 
   public Symbol putSymbol(Symbol symbol) {
@@ -80,7 +83,7 @@ public class SymbolTable {
    */
   private Symbol put(Symbol symbol) {
     int h = hash(symbol.getName());
-    if (symbolAlreadyExists(h)) {
+    if (symbolAlreadyExists(h, symbol)) {
       return null;
     }
 
@@ -262,27 +265,38 @@ public class SymbolTable {
         break;
       }
     }
+    it.previous();
     it.add(symbol);
   }
 
   /**
-   * Check if the specified hash already exists in the symbol table at the current scope level.
+   * Check if the specified Symbol already exists in the symbol table.
    *
-   * @param hash the hash of a symbol name
-   * @return true if there already exists a symbol whose hashed name is {@code hash} at the current
-   * scope level, false otherwise
+   * @param hash the hash of the symbol
+   * @param symbol the symbol
+   * @return true if the specified symbol already exists in the table, false otherwise
    */
-  private boolean symbolAlreadyExists(int hash) {
-    List<Symbol> s = symbols[hash];
-    return s != null && !s.isEmpty() && s.get(0).getScope() == currentScope;
+  private boolean symbolAlreadyExists(int hash, Symbol symbol) {
+    List<Symbol> symbolList = symbols[hash];
+    if (symbolList == null) {
+      return false;
+    }
+    for (Symbol s : symbolList) {
+      if (s.getName().equals(symbol.getName()) && s.getScope() == symbol.getScope()) {
+        return true;
+      } else if (s.getScope() < symbol.getScope()) {
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
-   * @param name the name of the symbol
-   * @see #symbolAlreadyExists(int)
+   * @param symbol the symbol to be checked
+   * @see #symbolAlreadyExists(int, Symbol)
    */
-  private boolean symbolAlreadyExists(String name) {
-    return symbolAlreadyExists(hash(name));
+  private boolean symbolAlreadyExists(Symbol symbol) {
+    return symbolAlreadyExists(hash(symbol.getName()), symbol);
   }
 
   /**

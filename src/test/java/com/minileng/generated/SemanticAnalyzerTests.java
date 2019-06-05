@@ -48,8 +48,17 @@ public class SemanticAnalyzerTests {
    * -3" or "id * 0 - 3 + 3".
    */
   @Test
-  public void divisionByZero() throws ParseException {
+  public void divisionByZeroComplexExpression() throws ParseException {
     String p = "programa t; entero a; principio a := 0 / (a * 0 / a * a * 3); fin";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "ERROR SEMÁNTICO(1, 40): Division por cero\n";
+    Assert.assertEquals(expected, stdOut.toString());
+  }
+
+  @Test
+  public void divisionByZeroSimpleExpression() throws ParseException {
+    String p = "programa t; entero a; principio a := 1 / 0; fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expected = "ERROR SEMÁNTICO(1, 40): Division por cero\n";
@@ -186,9 +195,10 @@ public class SemanticAnalyzerTests {
         + "principio leer(f1, f2, f3); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
-    String expected = "ERROR SEMÁNTICO(1, 172): El simbolo no es una variable o un parámetro: \"f1\"\n"
-        + "ERROR SEMÁNTICO(1, 176): El simbolo no es una variable o un parámetro: \"f2\"\n"
-        + "ERROR SEMÁNTICO(1, 180): El simbolo no es una variable o un parámetro: \"f3\"\n";
+    String expected =
+        "ERROR SEMÁNTICO(1, 172): El simbolo no es una variable o un parámetro: \"f1\"\n"
+            + "ERROR SEMÁNTICO(1, 176): El simbolo no es una variable o un parámetro: \"f2\"\n"
+            + "ERROR SEMÁNTICO(1, 180): El simbolo no es una variable o un parámetro: \"f3\"\n";
     Assert.assertEquals(expected, stdOut.toString());
   }
 }

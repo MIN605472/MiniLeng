@@ -1,11 +1,11 @@
 plugins {
     id "ca.coglinc.javacc" version "2.4.0"
+    id 'application'
+    id 'java'
 }
 
 group 'com.minileng'
 version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
@@ -48,5 +48,7 @@ jar {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+
+mainClassName = 'com.minileng.ML'
 
 compileJava.dependsOn compileJavacc
