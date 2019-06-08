@@ -262,12 +262,35 @@ public class FollowSets {
       s.add("tID");
       s.add("tKCARACTER");
       s.add("tPAR_IZQ");
-      s.add("tCARAENT");
       s.add("tENTACAR");
+      s.add("tCARAENT");
       followSets.put("operador_relacional", s);
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tMUL");
+      s.add("tDIV");
+      s.add("tDIVCHAR");
+      s.add("tMOD");
+      s.add("tMAS");
+      s.add("tMENOS");
+      s.add("tMAYOR");
+      s.add("tMENOR");
+      s.add("tIGUAL");
+      s.add("tMAI");
+      s.add("tMEI");
+      s.add("tNI");
+      s.add("tAND");
+      s.add("tOR");
+      s.add("tPUNTOCOMA");
+      s.add("tLEER");
+      s.add("tESCRIBIR");
+      s.add("tID");
+      s.add("tSI");
+      s.add("tMQ");
+      s.add("tCOMA");
+      s.add("tPAR_DCHA");
+      s.add("tENT");
       followSets.put("caraent", s);
     }
     {
@@ -539,10 +562,6 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
-      followSets.put("caraent_", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
       s.add("tAND");
       s.add("tOR");
       s.add("tPUNTOCOMA");
@@ -558,33 +577,6 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
-      s.add("tMUL");
-      s.add("tDIV");
-      s.add("tDIVCHAR");
-      s.add("tMOD");
-      s.add("tMAS");
-      s.add("tMENOS");
-      s.add("tMAYOR");
-      s.add("tMENOR");
-      s.add("tIGUAL");
-      s.add("tMAI");
-      s.add("tMEI");
-      s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("factor_arit_", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -596,37 +588,6 @@ public class FollowSets {
       s.add("tFSI");
       s.add("tSI_NO");
       followSets.put("seleccion__", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      followSets.put("caraent__", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      s.add("tMUL");
-      s.add("tDIV");
-      s.add("tDIVCHAR");
-      s.add("tMOD");
-      s.add("tMAS");
-      s.add("tMENOS");
-      s.add("tMAYOR");
-      s.add("tMENOR");
-      s.add("tIGUAL");
-      s.add("tMAI");
-      s.add("tMEI");
-      s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("factor_arit__", s);
     }
     {
       Set<String> s = new HashSet<>();

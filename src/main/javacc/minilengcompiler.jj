@@ -1033,15 +1033,19 @@ Token operador_relacional() :
   {return t;}
 }
 
-void caraent() :
+Constexpr caraent() :
 {
+  Constexpr constexpr = new Constexpr();
 }
 
 {
   try {
-    <tCARAENT> caraent_()
+    <tCARAENT> <tPAR_IZQ> constexpr = expresion_bool() <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("caraent", e);
+  }
+  {
+    return constexpr;
   }
 }
 
@@ -1238,7 +1242,7 @@ Constexpr factor_arit() :
     }
     | <tPAR_IZQ> constexpr = expresion_bool() {genExpDrf(constexpr);} <tPAR_DCHA>
     | constexpr = entacar()
-    | <tCARAENT> constexpr = factor_arit_()
+    | constexpr = caraent()
   } catch (ParseException e) {
     recoverParsingError("factor_arit", e);
   }
@@ -1415,20 +1419,6 @@ void seleccion_(IntWrapper freeAddress) :
   }
 }
 
-Constexpr caraent_() :
-{
-  Constexpr constexpr = new Constexpr();
-}
-
-{
-  try {
-    <tPAR_IZQ> constexpr = caraent__()
-  } catch (ParseException e) {
-    recoverParsingError("caraent_", e);
-  }
-  {return constexpr;}
-}
-
 Constexpr relacion_(Constexpr inherit) :
 {
   Constexpr constexpr = new Constexpr();
@@ -1476,20 +1466,6 @@ Constexpr relacion_(Constexpr inherit) :
   {return constexpr;}
 }
 
-Constexpr factor_arit_() :
-{
-  Constexpr constexpr = new Constexpr();
-}
-
-{
-  try {
-    <tPAR_IZQ> constexpr = factor_arit__()
-  } catch (ParseException e) {
-    recoverParsingError("factor_arit_", e);
-  }
-  {return constexpr;}
-}
-
 void seleccion__(String labelFalse, IntWrapper freeAddress) :
 {
 }
@@ -1500,74 +1476,6 @@ void seleccion__(String labelFalse, IntWrapper freeAddress) :
   } catch (ParseException e) {
     recoverParsingError("seleccion__", e);
   }
-}
-
-Constexpr caraent__() :
-{
-  Token id;
-  Constexpr constexpr = new Constexpr();
-}
-
-{
-  try {
-    id = <tKCARACTER> <tPAR_DCHA>
-    {
-      constexpr.isConst = true;
-      constexpr.value = id.image.charAt(1);
-      gen.stc(id.image.charAt(1));
-    }
-    | constexpr = entacar() <tPAR_DCHA>
-    | id = <tID>
-    {
-      Symbol symId = SymbolTable.getInstance().get(id.image);
-      if (isValidVariableOrParameter(id)) {
-        gen.srf(SymbolTable.getInstance().getCurrentScope() - symId.getScope(),
-            symId.getAddress());
-        gen.drf();
-        if (symId.isReference()) {
-          gen.drf();
-        }
-      }
-    }
-    <tPAR_DCHA>
-  } catch (ParseException e) {
-    recoverParsingError("caraent__", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr factor_arit__() :
-{
-  Token id;
-  Constexpr constexpr = new Constexpr();
-}
-
-{
-  try {
-    id = <tKCARACTER> <tPAR_DCHA>
-    {
-      constexpr.isConst = true;
-      constexpr.value = id.image.charAt(1);
-      gen.stc(id.image.charAt(1));
-    }
-    | constexpr = entacar() <tPAR_DCHA>
-    | id = <tID>
-    {
-      Symbol sym = SymbolTable.getInstance().get(id.image);
-      if (isValidVariableOrParameter(id)) {
-        gen.srf(SymbolTable.getInstance().getCurrentScope() - sym.getScope(),
-            sym.getAddress());
-        gen.drf();
-        if (sym.isReference()) {
-          gen.drf();
-        }
-      }
-    }
-    <tPAR_DCHA>
-  } catch (ParseException e) {
-    recoverParsingError("factor_arit__", e);
-  }
-  {return constexpr;}
 }
 
 void seleccion___(String labelFalse, IntWrapper freeAddress) :
