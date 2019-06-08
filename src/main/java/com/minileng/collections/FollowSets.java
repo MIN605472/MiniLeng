@@ -229,16 +229,13 @@ public class FollowSets {
     {
       Set<String> s = new HashSet<>();
       s.add("tCOMA");
+      s.add("tPAR_DCHA");
       followSets.put("argumento_escribir", s);
     }
     {
       Set<String> s = new HashSet<>();
       s.add("tPAR_DCHA");
       followSets.put("lista_argumentos_vacia", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      followSets.put("lista_argumentos_no_vacia", s);
     }
     {
       Set<String> s = new HashSet<>();
@@ -252,12 +249,15 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tPAR_DCHA");
       followSets.put("repeticion_argumentos_escribir", s);
     }
     {
       Set<String> s = new HashSet<>();
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tFALSE");
+      s.add("tTRUE");
       s.add("tKENTERO");
       s.add("tID");
       s.add("tKCARACTER");
@@ -338,21 +338,6 @@ public class FollowSets {
       s.add("tPAR_DCHA");
       s.add("tENT");
       followSets.put("factor_bool_unario", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      s.add("tAND");
-      s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("factor_bool", s);
     }
     {
       Set<String> s = new HashSet<>();
@@ -671,6 +656,7 @@ public class FollowSets {
       s.add("tSI_NO");
       followSets.put("seleccion____", s);
     }
+
   }
 
   public static Set getFollowSet(String nonterminal) {

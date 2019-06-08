@@ -169,10 +169,12 @@ public class MiniLeng {
     if (sym == null) {
       LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
           id.beginColumn, id.image);
+      isThereASemanticError = true;
       return false;
     } else if (sym.getSymbolType() != Symbol.SymbolType.VARIABLE && sym.getSymbolType() != Symbol.SymbolType.PARAMETER) {
       LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
           id.beginLine, id.beginColumn, id.image);
+      isThereASemanticError = true;
       return false;
     } else {
       return true;
@@ -184,15 +186,18 @@ public class MiniLeng {
     if (sym == null) {
       LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
           id.beginColumn, id.image);
+      isThereASemanticError = true;
       return false;
     } else if (sym.getSymbolType() != Symbol.SymbolType.ACTION) {
       LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
           id.beginLine, id.beginColumn, id.image);
+      isThereASemanticError = true;
       return false;
     } else if (sym.getParameterList().size() != numArgs) {
       LOG.info("ERROR SEMÁNTICO({}, {}): Número de argumentos ({}) es distinto al número de"
         + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
         sym.getParameterList().size(), id.image);
+      isThereASemanticError = true;
       return false;
     } else {
       return true;
@@ -422,6 +427,7 @@ void declaracion(IntWrapper addr) :
           if(null == SymbolTable.getInstance().putVariable(id.image, variableType, addr.value++)) {
             LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
                 id.beginLine, id.beginColumn, id.image);
+            isThereASemanticError = true;
           }
       }
     }
@@ -535,6 +541,7 @@ void cabecera_accion(IntWrapper addr) :
           gen.getInstrCount())) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
             actionId.beginLine, actionId.beginColumn, actionId.image);
+        isThereASemanticError = true;
       }
       SymbolTable.getInstance().openScope();
       {
@@ -544,6 +551,7 @@ void cabecera_accion(IntWrapper addr) :
             if (SymbolTable.getInstance().putSymbol(paramSyms.get(i++)) == null) {
               LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo ya declarado previamente: \"{}\"",
                   idToken.beginLine, idToken.beginColumn, idToken.image);
+              isThereASemanticError = true;
             }
           }
         }
@@ -1052,6 +1060,7 @@ Constexpr entacar() :
       if (constexpr.isConst && (constexpr.value < 0 || constexpr.value > 255)) {
         LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
             + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
+        isThereASemanticError = true;
       }
     }
     <tPAR_DCHA>
@@ -1099,42 +1108,16 @@ Constexpr factor_bool_unario() :
 
 {
   try {
-    <tNOT> constexpr = factor_bool()
+    <tNOT> constexpr = relacion()
     {
       constexpr.value = constexpr.value != 0 ? 0 : 1;
       genExpDrf(constexpr);
       constexpr.isLValue = false;
       gen.ngb();
     }
-    | constexpr = factor_bool()
-  } catch (ParseException e) {
-    recoverParsingError("factor_bool_unario", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr factor_bool() :
-{
-  Constexpr constexpr = new Constexpr();
-}
-
-{
-  try {
-    <tFALSE>
-    {
-      constexpr.isConst = true;
-      constexpr.value = 0;
-      gen.stc(0);
-    }
-    | <tTRUE>
-    {
-      constexpr.isConst = true;
-      constexpr.value = 1;
-      gen.stc(1);
-    }
     | constexpr = relacion()
   } catch (ParseException e) {
-    recoverParsingError("factor_bool", e);
+    recoverParsingError("factor_bool_unario", e);
   }
   {return constexpr;}
 }
@@ -1217,7 +1200,19 @@ Constexpr factor_arit() :
 
 {
   try {
-    id = <tKENTERO>
+    <tFALSE>
+    {
+      constexpr.isConst = true;
+      constexpr.value = 0;
+      gen.stc(0);
+    }
+    | <tTRUE>
+    {
+      constexpr.isConst = true;
+      constexpr.value = 1;
+      gen.stc(1);
+    }
+    | id = <tKENTERO>
     {
       constexpr.isConst = true;
       constexpr.value = Integer.valueOf(id.image);
@@ -1360,6 +1355,7 @@ Constexpr term_arit_(Constexpr inherit) :
       if (term.isConst) {
         if (term.value == 0) {
           LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+          isThereASemanticError = true;
         } else {
           constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
           constexpr.value = inherit.value / term.value;
@@ -1374,6 +1370,7 @@ Constexpr term_arit_(Constexpr inherit) :
       if (term.isConst) {
         if (term.value == 0) {
           LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
+          isThereASemanticError = true;
         } else {
           constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
           constexpr.value = inherit.value / term.value;
@@ -1387,6 +1384,7 @@ Constexpr term_arit_(Constexpr inherit) :
     {
       if (term.isConst && term.value == 0) {
         LOG.info("ERROR SEMÁNTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
+        isThereASemanticError = true;
       } else {
         constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
         constexpr.value = inherit.value % term.value;

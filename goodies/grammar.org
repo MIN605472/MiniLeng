@@ -56,13 +56,12 @@
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
      expresion_bool : expresion_bool tOR term_bool | term_bool ;
      term_bool : term_bool tAND factor_bool_unario | factor_bool_unario ;
-     factor_bool_unario : tNOT factor_bool | factor_bool;
-     factor_bool : tFALSE | tTRUE | relacion ;
+     factor_bool_unario : tNOT relacion | relacion;
      relacion : expresion_arit operador_relacional expresion_arit | expresion_arit ;
      expresion_arit : expresion_arit tMAS term_arit | expresion_arit tMENOS term_arit | term_arit ;
      term_arit : term_arit tMUL factor_arit_unario | term_arit tDIV factor_arit_unario | term_arit tDIVCHAR factor_arit_unario | term_arit tMOD factor_arit_unario | factor_arit_unario ;
      factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
-     factor_arit : tKENTERO | tID | caraent | tKCARACTER | entacar | tPAR_IZQ expresion_bool tPAR_DCHA ;
+     factor_arit : tFALSE | tTRUE | tKENTERO | tID | caraent | tKCARACTER | entacar | tPAR_IZQ expresion_bool tPAR_DCHA ;
      %%
    #+END_EXAMPLE
 
@@ -114,13 +113,12 @@
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
      expresion_bool : term_bool expresion_bool' ;
      term_bool : factor_bool_unario term_bool' ;
-     factor_bool_unario : tNOT factor_bool | factor_bool ;
-     factor_bool : tFALSE | tTRUE | relacion ;
+     factor_bool_unario : tNOT relacion | relacion ;
      relacion : expresion_arit relacion' ;
      expresion_arit : term_arit expresion_arit' ;
      term_arit : factor_arit_unario term_arit' ;
      factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
-     factor_arit : tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | entacar | tCARAENT factor_arit' ;
+     factor_arit : tFALSE | tTRUE | tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | entacar | tCARAENT factor_arit' ;
      expresion_bool' : tOR term_bool expresion_bool' | ;
      term_bool' : tAND factor_bool_unario term_bool' | ;
      expresion_arit' : tMAS term_arit expresion_arit' | | tMENOS term_arit expresion_arit' ;
@@ -418,20 +416,12 @@
       expresion_bool() repeticion_argumentos() | {}
     }
 
-    void lista_argumentos_no_vacia() :
-    {
-    }
-
-    {
-      expresion_bool() repeticion_argumentos()
-    }
-
     void lista_argumentos_escribir() :
     {
     }
 
     {
-      <tKCADENA> repeticion_argumentos() | expresion_bool() repeticion_argumentos()
+      <tKCADENA> repeticion_argumentos_escribir() | expresion_bool() repeticion_argumentos_escribir()
     }
 
     void repeticion_argumentos() :
@@ -447,7 +437,7 @@
     }
 
     {
-      <tCOMA> argumento_escribir() repeticion_argumentos_escribir()
+      <tCOMA> argumento_escribir() repeticion_argumentos_escribir() | {}
     }
 
     void operador_relacional() :
@@ -495,15 +485,7 @@
     }
 
     {
-      <tNOT> factor_bool() | factor_bool()
-    }
-
-    void factor_bool() :
-    {
-    }
-
-    {
-      <tFALSE> | <tTRUE> | relacion()
+      <tNOT> relacion() | relacion()
     }
 
     void relacion() :
@@ -543,7 +525,7 @@
     }
 
     {
-      <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | entacar() | <tCARAENT> factor_arit_()
+      <tFALSE> | <tTRUE> | <tKENTERO> | <tID> | <tKCARACTER> | <tPAR_IZQ> expresion_bool() <tPAR_DCHA> | entacar() | <tCARAENT> factor_arit_()
     }
 
     void expresion_bool_() :
