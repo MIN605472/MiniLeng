@@ -1596,7 +1596,7 @@ Expr term_arit_(Expr inherit) :
         }
       }
     }
-    term = term_arit_(factor)
+    term = term_arit_(expr)
     | {} {term = inherit;}
   } catch (ParseException e) {
     recoverParsingError("term_arit_", e);
