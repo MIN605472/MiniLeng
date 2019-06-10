@@ -1304,19 +1304,19 @@ Expr factor_arit_unario() :
     }
     | t = <tMENOS> expr = factor_arit()
     {
-      expr.value = -1 * expr.value;
-      expr.isLValue = false;
       checkTypeOfUnaryOperator(expr, t.next, Symbol.VariableType.INT);
       genExpDrf(expr);
       gen.ngi();
+      expr.value = -1 * expr.value;
+      expr.isLValue = false;
     }
     | t = <tNOT> expr = factor_arit()
     {
       checkTypeOfUnaryOperator(expr, t.next, Symbol.VariableType.BOOL);
-      expr.value = expr.value != 0 ? 0 : 1;
-      expr.isLValue = false;
       genExpDrf(expr);
       gen.ngb();
+      expr.value = expr.value != 0 ? 0 : 1;
+      expr.isLValue = false;
     }
     | expr = factor_arit()
   } catch (ParseException e) {
