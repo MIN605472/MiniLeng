@@ -688,7 +688,9 @@ void cabecera_accion(IntWrapper addr) :
       gen.comment("Accion: " + actionId.image);
       for (int i = paramSyms.size() - 1; i >= 0; --i) {
         Symbol s = paramSyms.get(i);
-        gen.srf(0, s.getAddress());
+        // Frame is gonna be zero anyways, but leave it like this for now
+        int frame = SymbolTable.getInstance().getCurrentScope() - s.getScope();
+        gen.srf(frame, s.getAddress());
         gen.asgi();
       }
     }
@@ -847,7 +849,8 @@ void leer() :
         if (checkIfSymbolExists(id)) {
           if (checkIfItsAssignable(id)) {
             Symbol idSym = SymbolTable.getInstance().get(id.image);
-            gen.srf(0, idSym.getAddress());
+            int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
+            gen.srf(frame, idSym.getAddress());
             if (idSym.isReference()) {
               gen.drf();
             }
