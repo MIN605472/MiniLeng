@@ -17,15 +17,16 @@ import org.apache.logging.log4j.Logger;
 public class ML {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String FILE_POSTFIX = ".code";
+  private static final String FILE_POSTFIX_CODE = ".code";
+  private static final String FILE_POSTFIX_SRC = ".ml";
 
   public static void main(String... args) {
     String outputFile = null;
     try {
       Args parsedArgs = ArgsParser.parse(args);
       String file = parsedArgs.getArg("file", String.class);
-      outputFile = file + FILE_POSTFIX;
-      MiniLeng.ReInit(new FileReader(file));
+      outputFile = file + FILE_POSTFIX_CODE;
+      MiniLeng.ReInit(new FileReader(file + FILE_POSTFIX_SRC));
       MiniLeng.programa();
       if (!Objects.isNull(parsedArgs.getArg("-v", Boolean.class))) {
         LOG.info("Tabla de frecuencia de tokens:\n{}",

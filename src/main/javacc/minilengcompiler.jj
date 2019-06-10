@@ -914,17 +914,19 @@ void asignacion(Token id) :
   try {
     op = <tOPAS> expr = expresion_bool()
     {
-      Expr left = new Expr();
-      left.type = idSym.getVariableType();
       if (checkIfSymbolExists(id)) {
-        if (checkIfItsAssignable(id) && checkTypesOfBinaryOperator(left, expr, left.type, op)) {
-          genExpDrf(expr);
-          int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
-          gen.srf(frame, idSym.getAddress());
-          if (idSym.isReference()) {
-            gen.drf();
+        if (checkIfItsAssignable(id)) {
+          Expr left = new Expr();
+          left.type = idSym.getVariableType();
+          if (checkTypesOfBinaryOperator(left, expr, left.type, op)) {
+            genExpDrf(expr);
+            int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
+            gen.srf(frame, idSym.getAddress());
+            if (idSym.isReference()) {
+              gen.drf();
+            }
+            gen.asgi();
           }
-          gen.asgi();
         }
       } else {
         SymbolTable.getInstance().putVariable(id.image, Symbol.VariableType.UNK, -1);

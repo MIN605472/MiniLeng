@@ -41,9 +41,9 @@ public class SyntacticAnalyzerTests {
   @Test
   public void thatThereIsNoErrorsWhenSyntaxIsValid() throws ParseException, FileNotFoundException {
     for (String f : VALID_SYNTAX_FILES) {
-        MiniLeng.ReInit(new FileReader(SyntacticAnalyzerTests.class.getResource(f).getFile()));
-        MiniLeng.programa();
-        Assert.assertEquals("", stdOut.toString());
+      MiniLeng.ReInit(new FileReader(SyntacticAnalyzerTests.class.getResource(f).getFile()));
+      MiniLeng.programa();
+      Assert.assertEquals("", stdOut.toString());
     }
   }
 
