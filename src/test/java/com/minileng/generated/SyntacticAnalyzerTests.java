@@ -109,7 +109,7 @@ public class SyntacticAnalyzerTests {
 
   @Test
   public void entacarAsOperandIsFine() throws ParseException {
-    String p = "programa t; entero a; principio a := entacar(10) + 3; fin";
+    String p = "programa t; caracter a; principio a := entacar(10); fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expectedOutput = "";
@@ -118,7 +118,7 @@ public class SyntacticAnalyzerTests {
 
   @Test
   public void singleLineCommentsAreFine() throws ParseException {
-    String p = "% Testing comment\nprograma t; entero a; principio a := entacar(10) + 3; fin";
+    String p = "% Testing comment\nprograma t; entero a; principio a := 10 + 3; fin";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expectedOutput = "";

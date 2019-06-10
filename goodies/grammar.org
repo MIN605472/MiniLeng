@@ -54,13 +54,12 @@
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT tPAR_IZQ expresion_bool tPAR_DCHA;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
-     expresion_bool : expresion_bool tOR term_bool | term_bool ;
-     term_bool : term_bool tAND factor_bool_unario | factor_bool_unario ;
-     factor_bool_unario : tNOT relacion | relacion;
-     relacion : expresion_arit operador_relacional expresion_arit | expresion_arit ;
+     expresion_bool : expresion_bool operador_relacional expresion_bool_simple | expresion_bool_simple;
+     expresion_bool_simple : expresion_bool_simple tOR term_bool | term_bool ;
+     term_bool : term_bool tAND expresion_arit | expresion_arit ;
      expresion_arit : expresion_arit tMAS term_arit | expresion_arit tMENOS term_arit | term_arit ;
      term_arit : term_arit tMUL factor_arit_unario | term_arit tDIV factor_arit_unario | term_arit tDIVCHAR factor_arit_unario | term_arit tMOD factor_arit_unario | factor_arit_unario ;
-     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
+     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | tNOT factor_arit | factor_arit ;
      factor_arit : tFALSE | tTRUE | tKENTERO | tID | caraent | tKCARACTER | entacar | tPAR_IZQ expresion_bool tPAR_DCHA ;
      %%
    #+END_EXAMPLE
@@ -104,27 +103,27 @@
      seleccion : tSI seleccion' ;
      argumentos_accion : tPAR_IZQ lista_argumentos_vacia tPAR_DCHA | ;
      argumento_escribir : tKCADENA | expresion_bool ;
-     lista_argumentos_vacia : expresion_bool repeticion_argumentos | ;
+     argumento_accion : expresion_bool ;
+     lista_argumentos_vacia : argumento_accion repeticion_argumentos | ;
      lista_argumentos_escribir : tKCADENA repeticion_argumentos_escribir | expresion_bool repeticion_argumentos_escribir ;
-     repeticion_argumentos : tCOMA expresion_bool repeticion_argumentos | ;
+     repeticion_argumentos : tCOMA argumento_accion repeticion_argumentos | ;
      repeticion_argumentos_escribir : tCOMA argumento_escribir repeticion_argumentos_escribir | ;
      operador_relacional : tMAYOR | tMENOR | tIGUAL | tMAI | tMEI | tNI ;
      caraent : tCARAENT tPAR_IZQ expresion_bool tPAR_DCHA ;
      entacar : tENTACAR tPAR_IZQ expresion_bool tPAR_DCHA ;
-     expresion_bool : term_bool expresion_bool' ;
-     term_bool : factor_bool_unario term_bool' ;
-     factor_bool_unario : tNOT relacion | relacion ;
-     relacion : expresion_arit relacion' ;
+     expresion_bool : expresion_bool_simple expresion_bool' ;
+     expresion_bool_simple : term_bool expresion_bool_simple' ;
+     term_bool : expresion_arit term_bool' ;
      expresion_arit : term_arit expresion_arit' ;
      term_arit : factor_arit_unario term_arit' ;
-     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | factor_arit ;
+     factor_arit_unario : tMAS factor_arit | tMENOS factor_arit | tNOT factor_arit | factor_arit ;
      factor_arit : tFALSE | tTRUE | tKENTERO | tID | tKCARACTER | tPAR_IZQ expresion_bool tPAR_DCHA | entacar | caraent ;
-     expresion_bool' : tOR term_bool expresion_bool' | ;
-     term_bool' : tAND factor_bool_unario term_bool' | ;
+     expresion_bool' : operador_relacional expresion_bool_simple expresion_bool' | ;
+     expresion_bool_simple' : tOR term_bool expresion_bool_simple' | ;
+     term_bool' : tAND expresion_arit term_bool' | ;
      expresion_arit' : tMAS term_arit expresion_arit' | | tMENOS term_arit expresion_arit' ;
      term_arit' : tMUL factor_arit_unario term_arit' | | tDIV factor_arit_unario term_arit' | tDIVCHAR factor_arit_unario term_arit' | tMOD factor_arit_unario term_arit' ;
      seleccion' : expresion_bool seleccion'' ;
-     relacion' : operador_relacional expresion_arit | ;
      seleccion'' : tENT seleccion''' ;
      seleccion''' : lista_sentencias seleccion'''' ;
      seleccion'''' : tFSI | tSI_NO lista_sentencias tFSI ;
@@ -465,7 +464,15 @@
     }
 
     {
-      term_bool() expresion_bool_()
+      expresion_bool_simple() expresion_bool_()
+    }
+
+    void expresion_bool_simple() :
+    {
+    }
+
+    {
+      term_bool() expresion_bool_simple_()
     }
 
     void term_bool() :
@@ -473,23 +480,7 @@
     }
 
     {
-      factor_bool_unario() term_bool_()
-    }
-
-    void factor_bool_unario() :
-    {
-    }
-
-    {
-      <tNOT> relacion() | relacion()
-    }
-
-    void relacion() :
-    {
-    }
-
-    {
-      expresion_arit() relacion_()
+      expresion_arit() term_bool_()
     }
 
     void expresion_arit() :
@@ -513,7 +504,7 @@
     }
 
     {
-      <tMAS> factor_arit() | <tMENOS> factor_arit() | factor_arit()
+      <tMAS> factor_arit() | <tMENOS> factor_arit() | <tNOT> factor_arit() | factor_arit()
     }
 
     void factor_arit() :
@@ -529,7 +520,15 @@
     }
 
     {
-      <tOR> term_bool() expresion_bool_() | {}
+      operador_relacional() expresion_bool_simple() expresion_bool_() | {}
+    }
+
+    void expresion_bool_simple_() :
+    {
+    }
+
+    {
+      <tOR> term_bool() expresion_bool_simple_() | {}
     }
 
     void term_bool_() :
@@ -537,7 +536,7 @@
     }
 
     {
-      <tAND> factor_bool_unario() term_bool_() | {}
+      <tAND> expresion_arit() term_bool_() | {}
     }
 
     void expresion_arit_() :
@@ -562,14 +561,6 @@
 
     {
       expresion_bool() seleccion__()
-    }
-
-    void relacion_() :
-    {
-    }
-
-    {
-      operador_relacional() expresion_arit() | {}
     }
 
     void seleccion__() :

@@ -234,6 +234,12 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tCOMA");
+      s.add("tPAR_DCHA");
+      followSets.put("argumento_accion", s);
+    }
+    {
+      Set<String> s = new HashSet<>();
       s.add("tPAR_DCHA");
       followSets.put("lista_argumentos_vacia", s);
     }
@@ -256,6 +262,7 @@ public class FollowSets {
       Set<String> s = new HashSet<>();
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tNOT");
       s.add("tFALSE");
       s.add("tTRUE");
       s.add("tKENTERO");
@@ -274,14 +281,14 @@ public class FollowSets {
       s.add("tMOD");
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -301,14 +308,14 @@ public class FollowSets {
       s.add("tMOD");
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -335,7 +342,32 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tMAYOR");
+      s.add("tMENOR");
+      s.add("tIGUAL");
+      s.add("tMAI");
+      s.add("tMEI");
+      s.add("tNI");
+      s.add("tPUNTOCOMA");
+      s.add("tLEER");
+      s.add("tESCRIBIR");
+      s.add("tID");
+      s.add("tSI");
+      s.add("tMQ");
+      s.add("tCOMA");
+      s.add("tPAR_DCHA");
+      s.add("tENT");
+      followSets.put("expresion_bool_simple", s);
+    }
+    {
+      Set<String> s = new HashSet<>();
       s.add("tOR");
+      s.add("tMAYOR");
+      s.add("tMENOR");
+      s.add("tIGUAL");
+      s.add("tMAI");
+      s.add("tMEI");
+      s.add("tNI");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -351,42 +383,12 @@ public class FollowSets {
       Set<String> s = new HashSet<>();
       s.add("tAND");
       s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("factor_bool_unario", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      s.add("tAND");
-      s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("relacion", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -402,14 +404,14 @@ public class FollowSets {
       Set<String> s = new HashSet<>();
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -429,14 +431,14 @@ public class FollowSets {
       s.add("tMOD");
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -456,14 +458,14 @@ public class FollowSets {
       s.add("tMOD");
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -490,7 +492,32 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tMAYOR");
+      s.add("tMENOR");
+      s.add("tIGUAL");
+      s.add("tMAI");
+      s.add("tMEI");
+      s.add("tNI");
+      s.add("tPUNTOCOMA");
+      s.add("tLEER");
+      s.add("tESCRIBIR");
+      s.add("tID");
+      s.add("tSI");
+      s.add("tMQ");
+      s.add("tCOMA");
+      s.add("tPAR_DCHA");
+      s.add("tENT");
+      followSets.put("expresion_bool_simple_", s);
+    }
+    {
+      Set<String> s = new HashSet<>();
       s.add("tOR");
+      s.add("tMAYOR");
+      s.add("tMENOR");
+      s.add("tIGUAL");
+      s.add("tMAI");
+      s.add("tMEI");
+      s.add("tNI");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -504,14 +531,14 @@ public class FollowSets {
     }
     {
       Set<String> s = new HashSet<>();
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -527,14 +554,14 @@ public class FollowSets {
       Set<String> s = new HashSet<>();
       s.add("tMAS");
       s.add("tMENOS");
+      s.add("tAND");
+      s.add("tOR");
       s.add("tMAYOR");
       s.add("tMENOR");
       s.add("tIGUAL");
       s.add("tMAI");
       s.add("tMEI");
       s.add("tNI");
-      s.add("tAND");
-      s.add("tOR");
       s.add("tPUNTOCOMA");
       s.add("tLEER");
       s.add("tESCRIBIR");
@@ -559,21 +586,6 @@ public class FollowSets {
       s.add("tFSI");
       s.add("tSI_NO");
       followSets.put("seleccion_", s);
-    }
-    {
-      Set<String> s = new HashSet<>();
-      s.add("tAND");
-      s.add("tOR");
-      s.add("tPUNTOCOMA");
-      s.add("tLEER");
-      s.add("tESCRIBIR");
-      s.add("tID");
-      s.add("tSI");
-      s.add("tMQ");
-      s.add("tCOMA");
-      s.add("tPAR_DCHA");
-      s.add("tENT");
-      followSets.put("relacion_", s);
     }
     {
       Set<String> s = new HashSet<>();
@@ -617,7 +629,6 @@ public class FollowSets {
       s.add("tSI_NO");
       followSets.put("seleccion____", s);
     }
-
   }
 
   public static Set getFollowSet(String nonterminal) {

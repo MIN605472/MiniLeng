@@ -94,7 +94,7 @@ public class CodeGeneratorTests {
   // Boolean expressions are not short circuited for now.
   @Test
   public void thatBoolExpIsFine() throws ParseException {
-    String p = "programa max; entero i; entero j; principio i := (false and (true or true)) or (not false); fin\n";
+    String p = "programa max; booleano i; entero j; principio i := (false and (true or true)) or (not false); fin\n";
     MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
     MiniLeng.programa();
     String expected = "\tENP L0\n"
@@ -200,46 +200,6 @@ public class CodeGeneratorTests {
     Assert.assertEquals(expected, MiniLeng.getCodeAsString());
   }
 
-  // If an rvalue is provided for a 'ref' qualified parameter, it should work just fine. This rvalue
-  // is going to simply be copied into the caller's frame, and its address is going to be passed to
-  // the callee.
-  @Test
-  public void funCallsWithRefQualParamWithRvalueArg() throws ParseException {
-    String p = "programa p;\n"
-        + "\n"
-        + "accion max(ref entero a; ref entero b);\n"
-        + "  principio\n"
-        + "  ;"
-        + "  fin\n"
-        + "\n"
-        + "principio\n"
-        + "  max(42, 40 + 2);\n"
-        + "fin\n";
-    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
-    MiniLeng.programa();
-    String expected = "\tENP L0\n"
-        + "; Accion: max\n"
-        + "\tSRF 0 4\n"
-        + "\tASGI\n"
-        + "\tSRF 0 3\n"
-        + "\tASGI\n"
-        + "\tCSF\n"
-        + "L0:\n"
-        + "\tSTC 42\n"
-        + "\tSRF 0 3\n"
-        + "\tASGI\n"
-        + "\tSRF 0 3\n"
-        + "\tSTC 40\n"
-        + "\tSTC 2\n"
-        + "\tPLUS\n"
-        + "\tSRF 0 4\n"
-        + "\tASGI\n"
-        + "\tSRF 0 4\n"
-        + "\tOSF 5 0 1\n"
-        + "\tLVP\n";
-    Assert.assertEquals(expected, MiniLeng.getCodeAsString());
-  }
-
   @Test
   public void thatGivenProgram2IsFine() throws ParseException {
     String p = "programa p;\n"
@@ -255,7 +215,7 @@ public class CodeGeneratorTests {
         + "  principio\n"
         + "    escribir(k, l);\n"
         + "    l := 0;\n"
-        + "    q(k);\n"
+        + "    q(l);\n"
         + "    q(l);\n"
         + "  fin\n"
         + "\n"
@@ -293,7 +253,8 @@ public class CodeGeneratorTests {
         + "\tSRF 0 4\n"
         + "\tDRF\n"
         + "\tASGI\n"
-        + "\tSRF 0 3\n"
+        + "\tSRF 0 4\n"
+        + "\tDRF\n"
         + "\tOSF 5 1 1\n"
         + "\tSRF 0 4\n"
         + "\tDRF\n"
@@ -307,4 +268,88 @@ public class CodeGeneratorTests {
         + "\tLVP\n";
     Assert.assertEquals(expected, MiniLeng.getCodeAsString());
   }
+
+  @Test
+  public void whatWhenABooleanIsWrittenTheirStringRepresentationIsWritten() throws ParseException {
+    String p = "programa t;\n"
+        + "\n"
+        + "  principio\n"
+        + "    escribir(True);\n"
+        + "    escribir(False);\n"
+        + "  fin\n";
+    MiniLeng.ReInit(new ByteArrayInputStream(p.getBytes(StandardCharsets.UTF_8)));
+    MiniLeng.programa();
+    String expected = "\tENP L0\n"
+        + "L0:\n"
+        + "\tSTC 1\n"
+        + "\tJMF L1\n"
+        + "\tSTC 86\n"
+        + "\tWRT 0\n"
+        + "\tSTC 101\n"
+        + "\tWRT 0\n"
+        + "\tSTC 114\n"
+        + "\tWRT 0\n"
+        + "\tSTC 100\n"
+        + "\tWRT 0\n"
+        + "\tSTC 97\n"
+        + "\tWRT 0\n"
+        + "\tSTC 100\n"
+        + "\tWRT 0\n"
+        + "\tSTC 101\n"
+        + "\tWRT 0\n"
+        + "\tSTC 114\n"
+        + "\tWRT 0\n"
+        + "\tSTC 111\n"
+        + "\tWRT 0\n"
+        + "\tJMP L2\n"
+        + "L1:\n"
+        + "\tSTC 70\n"
+        + "\tWRT 0\n"
+        + "\tSTC 97\n"
+        + "\tWRT 0\n"
+        + "\tSTC 108\n"
+        + "\tWRT 0\n"
+        + "\tSTC 115\n"
+        + "\tWRT 0\n"
+        + "\tSTC 111\n"
+        + "\tWRT 0\n"
+        + "L2:\n"
+        + "\tSTC 0\n"
+        + "\tJMF L3\n"
+        + "\tSTC 86\n"
+        + "\tWRT 0\n"
+        + "\tSTC 101\n"
+        + "\tWRT 0\n"
+        + "\tSTC 114\n"
+        + "\tWRT 0\n"
+        + "\tSTC 100\n"
+        + "\tWRT 0\n"
+        + "\tSTC 97\n"
+        + "\tWRT 0\n"
+        + "\tSTC 100\n"
+        + "\tWRT 0\n"
+        + "\tSTC 101\n"
+        + "\tWRT 0\n"
+        + "\tSTC 114\n"
+        + "\tWRT 0\n"
+        + "\tSTC 111\n"
+        + "\tWRT 0\n"
+        + "\tJMP L4\n"
+        + "L3:\n"
+        + "\tSTC 70\n"
+        + "\tWRT 0\n"
+        + "\tSTC 97\n"
+        + "\tWRT 0\n"
+        + "\tSTC 108\n"
+        + "\tWRT 0\n"
+        + "\tSTC 115\n"
+        + "\tWRT 0\n"
+        + "\tSTC 111\n"
+        + "\tWRT 0\n"
+        + "L4:\n"
+        + "\tLVP\n";
+    Assert.assertEquals(expected, MiniLeng.getCodeAsString());
+  }
+
+
 }

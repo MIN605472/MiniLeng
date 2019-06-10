@@ -92,7 +92,8 @@ public class Symbol {
    * @return the action symbol with the specified values
    */
   public static Symbol buildAction(String name, List<Symbol> parameterList, int scope,
-      int address) {;
+      int address) {
+    ;
     if (name == null || parameterList == null) {
       throw new IllegalArgumentException("Arguments must be non null");
     }
@@ -187,6 +188,15 @@ public class Symbol {
   }
 
   /**
+   * Check if this symbol is a variable or a parameter and has an unknown variable type.
+   *
+   * @return true if this symbol is a variable or a parameter whose variable type is unknown
+   */
+  public boolean isUnk() {
+    return (isVariable() || isParameter()) && variableType == VariableType.UNK;
+  }
+
+  /**
    * Check if this symbol is a program symbol.
    *
    * @return true if this symbol is a program symbol, false otherwise
@@ -213,6 +223,6 @@ public class Symbol {
    * The types of variables that there can be.
    */
   public enum VariableType {
-    UNKNOWN, INT, BOOL, CHAR, STRING
+    UNK, INT, BOOL, CHAR, STRING
   }
 }

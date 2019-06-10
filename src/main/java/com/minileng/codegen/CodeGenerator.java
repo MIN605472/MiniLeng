@@ -249,6 +249,13 @@ public class CodeGenerator {
     sb.append(l).append(":\n");
   }
 
+  public void writeString(String str) {
+    for (int i = 0; i < str.length(); ++i) {
+      stc(str.charAt(i));
+      wrt(false);
+    }
+  }
+
   @Override
   public String toString() {
     return sb.toString();

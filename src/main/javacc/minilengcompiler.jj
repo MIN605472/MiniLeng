@@ -26,30 +26,32 @@ import org.apache.logging.log4j.Logger;
 
 public class MiniLeng {
 
-  private static class Constexpr {
+  private static class Expr {
     public boolean isConst;
     public int value;
     public boolean isLValue;
     public Symbol sym;
-    public boolean interpAsChar;
-    public Constexpr(boolean isConst, int value, boolean isLValue) {
+    public Symbol.VariableType type;
+
+    public Expr(boolean isConst, int value, boolean isLValue) {
       this.isConst = isConst;
       this.value = value;
       this.isLValue = isLValue;
     }
-    public Constexpr(boolean isConst, int value) {
+    public Expr(boolean isConst, int value) {
       this.isConst = isConst;
       this.value = value;
       this.isLValue = false;
     }
-    public Constexpr(boolean isConst) {
+    public Expr(boolean isConst) {
       this.isConst = isConst;
       this.value = -1;
     }
-    public Constexpr() {
+    public Expr() {
       this.isConst = false;
       this.value = -1;
       this.isLValue = false;
+      this.type = Symbol.VariableType.UNK;
     }
   }
 
@@ -139,7 +141,7 @@ public class MiniLeng {
         type = Symbol.VariableType.BOOL;
         break;
       default:
-        type = Symbol.VariableType.UNKNOWN;
+        type = Symbol.VariableType.UNK;
         break;
     }
     return type;
@@ -164,50 +166,135 @@ public class MiniLeng {
     }
   }
 
-  private static boolean isValidVariableOrParameter(Token id) {
-    Symbol sym = SymbolTable.getInstance().get(id.image);
-    if (sym == null) {
-      LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-          id.beginColumn, id.image);
-      isThereASemanticError = true;
-      return false;
-    } else if (sym.getSymbolType() != Symbol.SymbolType.VARIABLE && sym.getSymbolType() != Symbol.SymbolType.PARAMETER) {
-      LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
-          id.beginLine, id.beginColumn, id.image);
-      isThereASemanticError = true;
-      return false;
-    } else {
+  private static boolean checkIfSymbolExists(Token token) {
+    Symbol sym = SymbolTable.getInstance().get(token.image);
+    if (sym != null) {
       return true;
     }
+    LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", token.beginLine,
+        token.beginColumn, token.image);
+    isThereASemanticError = true;
+    /* SymbolTable.getInstance().putVariable(token.image, Symbol.VariableType.UNK, -1); */
+    return false;
   }
 
-  private static boolean isValidAction(Token id, int numArgs) {
+  private static boolean checkIfItsVarOrParam(Token token) {
+    Symbol sym = SymbolTable.getInstance().get(token.image);
+    if (sym.isVariable() || sym.isParameter())  {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro: \"{}\"",
+        token.beginLine, token.beginColumn, token.image);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkIfItsAssignable(Token token) {
+    Symbol sym = SymbolTable.getInstance().get(token.image);
+    if (sym.isVariable() || sym.isReference()) {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una variable o un parámetro calificado con \"ref\": \"{}\"",
+        token.beginLine, token.beginColumn, token.image);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkIfArgIsValid(Expr arg, Symbol param, Token t) {
+    if (param.isReference() && (!arg.isLValue || arg.sym.isValue())) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): No se puede pasar un rvalue a un parametero calificado con \"ref\"",
+          t.beginLine, t.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkArgAndParamTypes(Expr arg, Symbol param, Token t) {
+    if (param.getVariableType() == arg.type ||
+          param.getVariableType() == Symbol.VariableType.UNK ||
+          arg.type == Symbol.VariableType.UNK) {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): Se esperaba un argumento del tipo {}, pero se ha obtenido uno del tipo {}",
+        t.beginLine, t.beginColumn, param.getVariableType(), arg.type);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkCaraentArg(Expr arg, Token t) {
+    if (arg.type != Symbol.VariableType.CHAR) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'caraent' ha de ser del tipo caracter", t.beginLine, t.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkEntacarArgType(Expr arg, Token t) {
+    if (arg.type != Symbol.VariableType.INT) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de ser del tipo entero", t.beginLine, t.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkEntacarArgConstValue(Expr arg, Token t) {
+    if (arg.isConst && (arg.value < 0 || arg.value > 255)) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
+          + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkDivByZero(Expr right, Token op) {
+    if (right.isConst && right.value == 0) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", op.beginLine, op.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkModuloZero(Expr right, Token op) {
+    if (right.isConst && right.value == 0) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): Modulo cero", op.beginLine, op.beginColumn);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkIfItsAnAction(Token id) {
     Symbol sym = SymbolTable.getInstance().get(id.image);
-    if (sym == null) {
-      LOG.info("ERROR SEMÁNTICO({}, {}): Simbolo no declarado: \"{}\"", id.beginLine,
-          id.beginColumn, id.image);
-      isThereASemanticError = true;
-      return false;
-    } else if (sym.getSymbolType() != Symbol.SymbolType.ACTION) {
-      LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
-          id.beginLine, id.beginColumn, id.image);
-      isThereASemanticError = true;
-      return false;
-    } else if (sym.getParameterList().size() != numArgs) {
+    if (sym.isAction()) {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): El simbolo no es una acción: \"{}\"",
+        id.beginLine, id.beginColumn, id.image);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkNumArgsAndParams(Token id, int actualNumArgs) {
+    Symbol sym = SymbolTable.getInstance().get(id.image);
+    if (sym.getParameterList().size() != actualNumArgs) {
       LOG.info("ERROR SEMÁNTICO({}, {}): Número de argumentos ({}) es distinto al número de"
-        + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, numArgs,
-        sym.getParameterList().size(), id.image);
+          + " parámetros ({}) para la acción: \"{}\"", id.beginLine, id.beginColumn, actualNumArgs,
+          sym.getParameterList().size(), id.image);
       isThereASemanticError = true;
       return false;
-    } else {
-      return true;
     }
+    return true;
   }
 
-  private static void genExpDrf(Constexpr constexpr) {
-    if (constexpr.isLValue) {
+  private static void genExpDrf(Expr expr) {
+    if (expr.isLValue) {
       gen.drf();
-      if (constexpr.sym != null && constexpr.sym.isReference()) {
+      if (expr.sym != null && expr.sym.isReference()) {
         gen.drf();
       }
     }
@@ -223,6 +310,48 @@ public class MiniLeng {
 
   public static void writeCodeToFile(String filename) throws IOException {
     gen.writeToFile(filename);
+  }
+
+  public static boolean checkTypeOfUnaryOperator(Expr expr, Token t, Symbol.VariableType expectedType) {
+    if (expr.type != expectedType && expr.type != Symbol.VariableType.UNK) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): La expresion ha de ser del tipo {}", t.beginLine, t.beginColumn, expectedType);
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean checkTypesOfBinaryOperator(Expr left, Expr right,
+      Symbol.VariableType typeOfBothOperands, Token operator) {
+    if (left.type == right.type && left.type == typeOfBothOperands ||
+          left.type == Symbol.VariableType.UNK || right.type == Symbol.VariableType.UNK) {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): Los operandos del operador \"{}\" han de ser del tipo {}",
+        operator.beginLine, operator.beginColumn, operator.image, typeOfBothOperands);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkTypesOfBinaryOperator(Expr left, Expr right, Token operator) {
+    if (left.type == right.type || left.type == Symbol.VariableType.UNK ||
+          right.type == Symbol.VariableType.UNK) {
+      return true;
+    }
+    LOG.info("ERROR SEMÁNTICO({}, {}): Los operandos del operador \"{}\" han de ser del mismo tipo",
+        operator.beginLine, operator.beginColumn, operator.image);
+    isThereASemanticError = true;
+    return false;
+  }
+
+  public static boolean checkBinaryOpForBoolCmp(Expr left, Expr right, Token op) {
+    if (left.type == Symbol.VariableType.BOOL && op.kind != tIGUAL && op.kind != tNI) {
+      LOG.info("ERROR SEMÁNTICO({}, {}): No se puede aplicar el operador \"{}\" a operandos del tipo booleano. Aplicar solo \"{}\" y \"{}\"",
+      op.beginLine, op.beginColumn, op.image, "<>", "=");
+      isThereASemanticError = true;
+      return false;
+    }
+    return true;
   }
 
   private static CodeGenerator gen = new CodeGenerator();
@@ -715,13 +844,17 @@ void leer() :
     <tLEER> <tPAR_IZQ> idTokens = identificadores()
     {
       for (Token id : idTokens) {
-        Symbol symId = SymbolTable.getInstance().get(id.image);
-        if (isValidVariableOrParameter(id)) {
-          gen.srf(0, symId.getAddress());
-          if (symId.isReference()) {
-            gen.drf();
+        if (checkIfSymbolExists(id)) {
+          if (checkIfItsAssignable(id)) {
+            Symbol idSym = SymbolTable.getInstance().get(id.image);
+            gen.srf(0, idSym.getAddress());
+            if (idSym.isReference()) {
+              gen.drf();
+            }
+            gen.rd(idSym.getVariableType() == Symbol.VariableType.INT);
           }
-          gen.rd(symId.getVariableType() == Symbol.VariableType.INT);
+        } else {
+          SymbolTable.getInstance().putVariable(id.image, Symbol.VariableType.UNK, -1);
         }
       }
     }
@@ -759,43 +892,43 @@ void asignacion_invocacion(IntWrapper freeAddress) :
 void asignacion_invocacion_(Token id, IntWrapper freeAddress) :
 {
   int numArgs;
-  Symbol idSym = SymbolTable.getInstance().get(id.image);
 }
 
 {
   try {
-    // TODO: put the calls to asignacion() and invocacion_accion() after checking the id symbol not before
-    asignacion()
-    {
-      if (isValidVariableOrParameter(id)) {
-        int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
-        gen.srf(frame, idSym.getAddress());
-        if (idSym.isReference()) {
-          gen.drf();
-        }
-        gen.asgi();
-      }
-    }
-    | numArgs = invocacion_accion(freeAddress, idSym)
-    {
-      if (isValidAction(id, numArgs)) {
-      }
-    }
+    asignacion(id)
+    | invocacion_accion(freeAddress, id)
   } catch (ParseException e) {
     recoverParsingError("asignacion_invocacion_", e);
   }
 }
 
-void asignacion() :
+void asignacion(Token id) :
 {
-  Constexpr constexpr;
+  Symbol idSym = SymbolTable.getInstance().get(id.image);
+  Expr expr;
+  Token op;
 }
 
 {
   try {
-    <tOPAS> constexpr = expresion_bool()
+    op = <tOPAS> expr = expresion_bool()
     {
-      genExpDrf(constexpr);
+      Expr left = new Expr();
+      left.type = idSym.getVariableType();
+      if (checkIfSymbolExists(id)) {
+        if (checkIfItsAssignable(id) && checkTypesOfBinaryOperator(left, expr, left.type, op)) {
+          genExpDrf(expr);
+          int frame = SymbolTable.getInstance().getCurrentScope() - idSym.getScope();
+          gen.srf(frame, idSym.getAddress());
+          if (idSym.isReference()) {
+            gen.drf();
+          }
+          gen.asgi();
+        }
+      } else {
+        SymbolTable.getInstance().putVariable(id.image, Symbol.VariableType.UNK, -1);
+      }
     }
     <tPUNTOCOMA>
   } catch (ParseException e) {
@@ -803,16 +936,33 @@ void asignacion() :
   }
 }
 
-int invocacion_accion(IntWrapper freeAddress, Symbol actionSym) :
+void invocacion_accion(IntWrapper freeAddress, Token id) :
 {
   int numArgs;
+  Symbol actionSym = null;
+  boolean insertDummyActionSym = false;
+  if (checkIfSymbolExists(id)) {
+    if (checkIfItsAnAction(id)) {
+      actionSym = SymbolTable.getInstance().get(id.image);
+    }
+  } else {
+    insertDummyActionSym = true;
+  }
 }
 
 {
   try {
     numArgs = argumentos_accion(freeAddress, actionSym) <tPUNTOCOMA>
     {
-      if (actionSym != null && actionSym.isAction()) {
+      if (insertDummyActionSym) {
+        List<Symbol> dummyParams = new ArrayList<Symbol>();
+        for (int i = 0; i < numArgs; ++i) {
+          Symbol dummyParam = Symbol.buildParameter("dummy_" + i,
+              Symbol.VariableType.UNK, Symbol.ParameterType.VAL, -1, -1);
+          dummyParams.add(dummyParam);
+        }
+        SymbolTable.getInstance().putAction(id.image, dummyParams, -1);
+      } else if (actionSym != null && checkNumArgsAndParams(id, numArgs)) {
         gen.osf(freeAddress.value,
             SymbolTable.getInstance().getCurrentScope() - actionSym.getScope(),
             actionSym.getAddress());
@@ -822,22 +972,21 @@ int invocacion_accion(IntWrapper freeAddress, Symbol actionSym) :
     recoverParsingError("invocacion_accion", e);
     numArgs = 0;
   }
-  {return numArgs;}
 }
 
 void mientras_que(IntWrapper freeAddress) :
 {
   String startLoopLabel;
   String endLoopLabel;
-  Constexpr constexpr;
+  Expr expr;
 }
 
 {
   try {
     <tMQ> {startLoopLabel = gen.newLabel(); gen.insertLabel(startLoopLabel);}
-    constexpr = expresion_bool()
+    expr = expresion_bool()
     {
-      genExpDrf(constexpr);
+      genExpDrf(expr);
       endLoopLabel = gen.newLabel();
       gen.jmf(endLoopLabel);
     }
@@ -876,27 +1025,70 @@ int argumentos_accion(IntWrapper freeAddress, Symbol actionSym) :
   {return numArgs;}
 }
 
+void argumento_accion(Symbol actionSym, IntWrapper argPos) :
+{
+  Expr expr;
+  Token t;
+}
+
+{
+  try {
+    {t = getToken(1);}
+    expr = expresion_bool()
+    {
+      if (actionSym != null) {
+        List<Symbol> params = actionSym.getParameterList();
+        if (argPos.value < params.size()) {
+          Symbol param = params.get(argPos.value);
+          if (checkIfArgIsValid(expr, param, t) &&
+                checkArgAndParamTypes(expr, param, t)) {
+            if (expr.isLValue) {
+              if (expr.sym.isReference()) {
+                gen.drf();
+              }
+              if (!param.isReference()) {
+                gen.drf();
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (ParseException e) {
+    recoverParsingError("argumento_accion", e);
+  }
+}
+
 void argumento_escribir() :
 {
   Token tCadena;
-  Constexpr constexpr;
+  Expr expr;
 }
 
 {
   try {
     tCadena = <tKCADENA>
     {
-//      for (int i = tCadena.image.length() - 1; i >= 0; --i) {
-//        gen.stc(tCadena.image.charAt(i));
-//        gen.wrt(false);
-//      }
-      for (int i = 1; i < tCadena.image.length() - 1; ++i) {
-        gen.stc(tCadena.image.charAt(i));
-        gen.wrt(false);
+      String imageWoQuotes = tCadena.image.substring(0, tCadena.image.length() - 1);
+      gen.writeString(imageWoQuotes);
+    }
+    | expr = expresion_bool()
+    {
+      if (expr.type == Symbol.VariableType.BOOL) {
+        genExpDrf(expr);
+        String lFalse = gen.newLabel();
+        String lOut = gen.newLabel();
+        gen.jmf(lFalse);
+        gen.writeString("Verdadero");
+        gen.jmp(lOut);
+        gen.insertLabel(lFalse);
+        gen.writeString("Falso");
+        gen.insertLabel(lOut);
+      } else {
+        genExpDrf(expr);
+        gen.wrt(expr.type == Symbol.VariableType.INT);
       }
     }
-    | constexpr = expresion_bool()
-    {genExpDrf(constexpr); gen.wrt(!constexpr.interpAsChar);}
   } catch (ParseException e) {
     recoverParsingError("argumento_escribir", e);
   }
@@ -904,36 +1096,14 @@ void argumento_escribir() :
 
 int lista_argumentos_vacia(IntWrapper freeAddress, Symbol actionSym) :
 {
-  Constexpr constexpr;
   IntWrapper argPos = new IntWrapper(0);
 }
 
 {
   try {
-    constexpr = expresion_bool()
-    {
-      if (actionSym != null && actionSym.isAction()) {
-        List<Symbol> params = actionSym.getParameterList();
-        if (argPos.value < params.size()) {
-          Symbol param = params.get(argPos.value);
-          if (!constexpr.isLValue) {
-            if (param.isReference()) {
-              gen.srf(0, freeAddress.value);
-              gen.asgi();
-              gen.srf(0, freeAddress.value++);
-            }
-          } else {
-            if (constexpr.sym.isReference()) {
-              gen.drf();
-            }
-            if (!param.isReference()) {
-              gen.drf();
-            }
-          }
-        }
-      }
-    }
-    repeticion_argumentos(freeAddress, actionSym, argPos) | {}
+    argumento_accion(actionSym, argPos)
+    repeticion_argumentos(freeAddress, actionSym, argPos)
+    | {} {return 0;}
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_vacia", e);
     return 0;
@@ -944,25 +1114,12 @@ int lista_argumentos_vacia(IntWrapper freeAddress, Symbol actionSym) :
 void lista_argumentos_escribir() :
 {
   Token tCadena;
-  Constexpr constexpr;
+  Expr expr;
 }
 
 {
   try {
-    tCadena = <tKCADENA>
-    {
-//      for (int i = tCadena.image.length() - 1; i >= 0; --i) {
-//        gen.stc(tCadena.image.charAt(i));
-//        gen.wrt(false);
-//      }
-      for (int i = 1; i < tCadena.image.length() - 1; ++i) {
-        gen.stc(tCadena.image.charAt(i));
-        gen.wrt(false);
-      }
-    }
-    repeticion_argumentos_escribir()
-    | constexpr = expresion_bool() {genExpDrf(constexpr); gen.wrt(!constexpr.interpAsChar);}
-    repeticion_argumentos_escribir()
+    argumento_escribir() repeticion_argumentos_escribir()
   } catch (ParseException e) {
     recoverParsingError("lista_argumentos_escribir", e);
   }
@@ -971,35 +1128,11 @@ void lista_argumentos_escribir() :
 void repeticion_argumentos(IntWrapper freeAddress, Symbol actionSym,
     IntWrapper argPos) :
 {
-  Constexpr constexpr;
 }
 
 {
   try {
-    <tCOMA> constexpr = expresion_bool()
-    {
-      argPos.value++;
-      if (actionSym != null && actionSym.isAction()) {
-        List<Symbol> params = actionSym.getParameterList();
-        if (argPos.value < params.size()) {
-          Symbol param = params.get(argPos.value);
-          if (!constexpr.isLValue) {
-            if (param.isReference()) {
-              gen.srf(0, freeAddress.value);
-              gen.asgi();
-              gen.srf(0, freeAddress.value++);
-            }
-          } else {
-            if (constexpr.sym.isReference()) {
-              gen.drf();
-            }
-            if (!param.isReference()) {
-              gen.drf();
-            }
-          }
-        }
-      }
-    }
+    <tCOMA> {argPos.value++;} argumento_accion(actionSym, argPos)
     repeticion_argumentos(freeAddress, actionSym, argPos) | {}
   } catch (ParseException e) {
     recoverParsingError("repeticion_argumentos", e);
@@ -1033,56 +1166,61 @@ Token operador_relacional() :
   {return t;}
 }
 
-Constexpr caraent() :
+Expr caraent() :
 {
-  Constexpr constexpr = new Constexpr();
+  Expr expr = new Expr();
+  Token t;
 }
 
 {
   try {
-    <tCARAENT> <tPAR_IZQ> constexpr = expresion_bool() <tPAR_DCHA>
+    t = <tCARAENT> <tPAR_IZQ> expr = expresion_bool() <tPAR_DCHA>
+    {
+      checkCaraentArg(expr, t);
+    }
   } catch (ParseException e) {
     recoverParsingError("caraent", e);
   }
   {
-    return constexpr;
+    expr.type = Symbol.VariableType.INT;
+    return expr;
   }
 }
 
-Constexpr entacar() :
+Expr entacar() :
 {
-   Constexpr constexpr = new Constexpr();
+   Expr expr = new Expr();
    Token t;
 }
 
 {
   try {
-    t = <tENTACAR> <tPAR_IZQ> constexpr = expresion_bool()
+    t = <tENTACAR> <tPAR_IZQ> expr = expresion_bool()
     {
-      genExpDrf(constexpr);
-      constexpr.interpAsChar = true;
-      if (constexpr.isConst && (constexpr.value < 0 || constexpr.value > 255)) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): El argumento de 'entacar' ha de tener un valor"
-            + "comprendido entre 0 y 255, ambos incluidos", t.beginLine, t.beginColumn);
-        isThereASemanticError = true;
+      if (checkEntacarArgType(expr, t) &&
+            checkEntacarArgConstValue(expr, t)) {
+        genExpDrf(expr);
       }
     }
     <tPAR_DCHA>
   } catch (ParseException e) {
     recoverParsingError("entacar", e);
   }
-  {return constexpr;}
+  {
+    expr.type = Symbol.VariableType.CHAR;
+    return expr;
+  }
 }
 
-Constexpr expresion_bool() :
+Expr expresion_bool() :
 {
-  Constexpr constexprTermBool = new Constexpr();
-  Constexpr constexprExpresionBool = new Constexpr();
+  Expr constexprTermBool = new Expr();
+  Expr constexprExpresionBool = new Expr();
 }
 
 {
   try {
-    constexprTermBool = term_bool()
+    constexprTermBool = expresion_bool_simple()
     constexprExpresionBool = expresion_bool_(constexprTermBool)
   } catch (ParseException e) {
     recoverParsingError("expresion_bool", e);
@@ -1090,78 +1228,55 @@ Constexpr expresion_bool() :
   {return constexprExpresionBool;}
 }
 
-Constexpr term_bool() :
+Expr expresion_bool_simple() :
 {
-  Constexpr factor = new Constexpr();
-  Constexpr term = new Constexpr();
+  Expr term = new Expr();
+  Expr expBool = new Expr();
 }
 
 {
   try {
-    factor = factor_bool_unario() term = term_bool_(factor)
+    term = term_bool() expBool = expresion_bool_simple_(term)
+  } catch (ParseException e) {
+    recoverParsingError("expresion_bool_simple", e);
+  }
+  {return expBool;}
+}
+
+Expr term_bool() :
+{
+  Expr factor = new Expr();
+  Expr term = new Expr();
+}
+
+{
+  try {
+    factor = expresion_arit() term = term_bool_(factor)
   } catch (ParseException e) {
     recoverParsingError("term_bool", e);
   }
   {return term;}
 }
 
-Constexpr factor_bool_unario() :
+Expr expresion_arit() :
 {
-  Constexpr constexpr = new Constexpr();
+  Expr term = new Expr();
+  Expr expArit = new Expr();
 }
 
 {
   try {
-    <tNOT> constexpr = relacion()
-    {
-      constexpr.value = constexpr.value != 0 ? 0 : 1;
-      genExpDrf(constexpr);
-      constexpr.isLValue = false;
-      gen.ngb();
-    }
-    | constexpr = relacion()
-  } catch (ParseException e) {
-    recoverParsingError("factor_bool_unario", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr relacion() :
-{
-  Constexpr expr = new Constexpr();
-  Constexpr rel = new Constexpr();
-}
-
-{
-  try {
-    expr = expresion_arit() rel = relacion_(expr)
-  } catch (ParseException e) {
-    recoverParsingError("relacion", e);
-  }
-  {return rel;}
-}
-
-Constexpr expresion_arit() :
-{
-  Constexpr constexpr = new Constexpr();
-  Constexpr term = new Constexpr();
-  Constexpr exp = new Constexpr();
-}
-
-{
-  try {
-    term = term_arit() exp = expresion_arit_(term)
+    term = term_arit() expArit = expresion_arit_(term)
   } catch (ParseException e) {
     recoverParsingError("expresion_arit", e);
   }
-  {return exp;}
+  {return expArit;}
 }
 
-Constexpr term_arit() :
+Expr term_arit() :
 {
-  Constexpr constexpr = new Constexpr();
-  Constexpr factor = new Constexpr();
-  Constexpr term = new Constexpr();
+  Expr factor = new Expr();
+  Expr term = new Expr();
 }
 
 {
@@ -1173,268 +1288,121 @@ Constexpr term_arit() :
   {return term;}
 }
 
-Constexpr factor_arit_unario() :
+Expr factor_arit_unario() :
 {
-  Constexpr constexpr = new Constexpr();
+  Expr expr = new Expr();
+  Token t;
 }
 
 {
   try {
-    <tMAS> constexpr = factor_arit() {constexpr.interpAsChar = false;}
-    | <tMENOS> constexpr = factor_arit()
+    t = <tMAS> expr = factor_arit()
     {
-      constexpr.value = -1 * constexpr.value;
-      constexpr.isLValue = false;
-      constexpr.interpAsChar = false;
-      genExpDrf(constexpr);
+      checkTypeOfUnaryOperator(expr, t.next, Symbol.VariableType.INT);
+    }
+    | t = <tMENOS> expr = factor_arit()
+    {
+      expr.value = -1 * expr.value;
+      expr.isLValue = false;
+      checkTypeOfUnaryOperator(expr, t.next, Symbol.VariableType.INT);
+      genExpDrf(expr);
       gen.ngi();
     }
-    | constexpr = factor_arit()
+    | t = <tNOT> expr = factor_arit()
+    {
+      checkTypeOfUnaryOperator(expr, t.next, Symbol.VariableType.BOOL);
+      expr.value = expr.value != 0 ? 0 : 1;
+      expr.isLValue = false;
+      genExpDrf(expr);
+      gen.ngb();
+    }
+    | expr = factor_arit()
   } catch (ParseException e) {
     recoverParsingError("factor_arit_unario", e);
   }
-  {return constexpr;}
+  {return expr;}
 }
 
-Constexpr factor_arit() :
+Expr factor_arit() :
 {
   Token id;
-  Constexpr constexpr = new Constexpr();
+  Expr expr = new Expr();
 }
 
 {
   try {
     <tFALSE>
     {
-      constexpr.isConst = true;
-      constexpr.value = 0;
+      expr.isConst = true;
+      expr.value = 0;
+      expr.type = Symbol.VariableType.BOOL;
       gen.stc(0);
     }
     | <tTRUE>
     {
-      constexpr.isConst = true;
-      constexpr.value = 1;
+      expr.isConst = true;
+      expr.value = 1;
+      expr.type = Symbol.VariableType.BOOL;
       gen.stc(1);
     }
     | id = <tKENTERO>
     {
-      constexpr.isConst = true;
-      constexpr.value = Integer.valueOf(id.image);
-      gen.stc(constexpr.value);
+      expr.isConst = true;
+      expr.value = Integer.valueOf(id.image);
+      expr.type = Symbol.VariableType.INT;
+      gen.stc(expr.value);
     }
     | id = <tID>
     {
-      Symbol symId = SymbolTable.getInstance().get(id.image);
-      if (isValidVariableOrParameter(id)) {
-        constexpr.isLValue = true;
-        constexpr.sym = symId;
-        constexpr.interpAsChar = symId.getVariableType() == Symbol.VariableType.CHAR;
-        gen.srf(SymbolTable.getInstance().getCurrentScope() - symId.getScope(),
-            symId.getAddress());
+      if (checkIfSymbolExists(id)) {
+        if (checkIfItsVarOrParam(id)) {
+          Symbol symId = SymbolTable.getInstance().get(id.image);
+          expr.isLValue = true;
+          expr.sym = symId;
+          expr.type = symId.getVariableType();
+          gen.srf(SymbolTable.getInstance().getCurrentScope() - symId.getScope(),
+              symId.getAddress());
+        }
+      } else {
+        SymbolTable.getInstance().putVariable(id.image, Symbol.VariableType.UNK, -1);
       }
     }
     | id = <tKCARACTER>
     {
-      constexpr.isConst = true;
-      constexpr.value = id.image.charAt(1);
-      constexpr.interpAsChar = true;
-      gen.stc(constexpr.value);
+      expr.isConst = true;
+      expr.value = id.image.charAt(1);
+      expr.type = Symbol.VariableType.CHAR;
+      gen.stc(expr.value);
     }
-    | <tPAR_IZQ> constexpr = expresion_bool() {genExpDrf(constexpr);} <tPAR_DCHA>
-    | constexpr = entacar()
-    | constexpr = caraent()
+    | <tPAR_IZQ> expr = expresion_bool() {genExpDrf(expr);} <tPAR_DCHA>
+    | expr = entacar()
+    | expr = caraent()
   } catch (ParseException e) {
     recoverParsingError("factor_arit", e);
   }
-  {return constexpr;}
+  {return expr;}
 }
 
-Constexpr expresion_bool_(Constexpr inherit) :
+Expr expresion_bool_(Expr inherit) :
 {
-  Constexpr constexpr = new Constexpr();
-  Constexpr term = new Constexpr();
-  Constexpr exp = new Constexpr();
-}
-
-{
-  try {
-    <tOR> {genExpDrf(inherit);}
-    term = term_bool() {genExpDrf(term); gen.or();}
-    exp = expresion_bool_(term)
-    {
-      constexpr.isConst = inherit.isConst && exp.isConst;
-      constexpr.value = (inherit.value != 0) || (exp.value != 0) ? 1 : 0;
-    }
-    | {} {constexpr = inherit;}
-  } catch (ParseException e) {
-    recoverParsingError("expresion_bool_", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr term_bool_(Constexpr inherit) :
-{
-  Constexpr constexpr = new Constexpr();
-  Constexpr factor = new Constexpr();
-  Constexpr term = new Constexpr();
-}
-
-{
-  try {
-    <tAND> {genExpDrf(inherit);}
-    factor = factor_bool_unario()
-    {genExpDrf(factor); gen.and();}
-    term = term_bool_(factor)
-    {
-      constexpr.isConst = inherit.isConst && term.isConst;
-      constexpr.value = (inherit.value != 0) && (term.value != 0) ? 1 : 0;
-    }
-    | {} {constexpr = inherit;}
-  } catch (ParseException e) {
-    recoverParsingError("term_bool_", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr expresion_arit_(Constexpr inherit) :
-{
-  Constexpr constexpr = new Constexpr();
-  Constexpr term = new Constexpr();
-  Constexpr exp = new Constexpr();
-}
-
-{
-  try {
-    <tMAS> {genExpDrf(inherit);}
-    term = term_arit() {genExpDrf(term); gen.plus();}
-    exp = expresion_arit_(term)
-    {
-      constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
-      constexpr.value = inherit.value + exp.value;
-    }
-    | <tMENOS> {genExpDrf(inherit);}
-    term = term_arit()
-    {genExpDrf(term); gen.sbt();}
-    exp = expresion_arit_(term)
-    {
-      constexpr.isConst = inherit.isConst && term.isConst && exp.isConst;
-      constexpr.value = inherit.value - exp.value;
-    }
-    | {} {constexpr = inherit;}
-  } catch (ParseException e) {
-    recoverParsingError("expresion_arit_", e);
-  }
-  {return constexpr;}
-}
-
-Constexpr term_arit_(Constexpr inherit) :
-{
-    Constexpr constexpr = new Constexpr();
-    Constexpr factor = new Constexpr();
-    Constexpr term = new Constexpr();
-    Token t;
-}
-
-{
-  try {
-    <tMUL> {genExpDrf(inherit);}
-    factor = factor_arit_unario()
-    {genExpDrf(factor); gen.tms();}
-    term = term_arit_(factor)
-    {
-      if (inherit.isConst && factor.isConst) {
-        constexpr.isConst = true;
-        constexpr.value = inherit.value * term.value;
-      } else if ((inherit.isConst && inherit.value == 0)
-            || (factor.isConst && factor.value == 0)) {
-        constexpr.isConst = true;
-        constexpr.value = 0;
-      }
-    }
-    | t = <tDIV> {genExpDrf(inherit);}
-    factor = factor_arit_unario()
-    {genExpDrf(factor); gen.div();}
-    term = term_arit_(factor)
-    {
-      if (term.isConst) {
-        if (term.value == 0) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
-          isThereASemanticError = true;
-        } else {
-          constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
-          constexpr.value = inherit.value / term.value;
-        }
-      }
-    }
-    | t = <tDIVCHAR> {genExpDrf(inherit);}
-    factor = factor_arit_unario()
-    {genExpDrf(factor); gen.div();}
-    term = term_arit_(factor)
-    {
-      if (term.isConst) {
-        if (term.value == 0) {
-          LOG.info("ERROR SEMÁNTICO({}, {}): Division por cero", t.beginLine, t.beginColumn);
-          isThereASemanticError = true;
-        } else {
-          constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
-          constexpr.value = inherit.value / term.value;
-        }
-      }
-    }
-    | t = <tMOD> {genExpDrf(inherit);}
-    factor = factor_arit_unario()
-    {genExpDrf(factor); gen.mod();}
-    term = term_arit_(factor)
-    {
-      if (term.isConst && term.value == 0) {
-        LOG.info("ERROR SEMÁNTICO({}, {}): Modulo cero", t.beginLine, t.beginColumn);
-        isThereASemanticError = true;
-      } else {
-        constexpr.isConst = inherit.isConst && term.isConst && factor.isConst;
-        constexpr.value = inherit.value % term.value;
-      }
-    }
-    | {} {constexpr = inherit;}
-  } catch (ParseException e) {
-    recoverParsingError("term_arit_", e);
-  }
-  {return constexpr;}
-}
-
-void seleccion_(IntWrapper freeAddress) :
-{
-  Constexpr constexpr;
-}
-{
-  try {
-    constexpr = expresion_bool()
-    {
-      genExpDrf(constexpr);
-      String labelFalse = gen.newLabel();
-      gen.jmf(labelFalse);
-    }
-    seleccion__(labelFalse, freeAddress)
-  } catch (ParseException e) {
-    recoverParsingError("seleccion_", e);
-  }
-}
-
-Constexpr relacion_(Constexpr inherit) :
-{
-  Constexpr constexpr = new Constexpr();
-  Constexpr exp = new Constexpr();
+  Expr expr = new Expr();
+  expr.type = Symbol.VariableType.BOOL;
+  Expr term = new Expr();
+  Expr exp = new Expr();
+  exp.type = Symbol.VariableType.BOOL;
   Token op;
 }
 
 {
   try {
     op = operador_relacional() {genExpDrf(inherit);}
-    exp = expresion_arit()
+    term = expresion_bool_simple()
     {
-      genExpDrf(exp);
-      constexpr.value = relation(op, inherit.value, exp.value) ? 1 : 0;
-      constexpr.isConst = inherit.isConst && exp.isConst;
-      if (!constexpr.isConst) {
+      if (checkTypesOfBinaryOperator(inherit, term, op) &&
+          checkBinaryOpForBoolCmp(inherit, term, op)) {
+        genExpDrf(term);
+        expr.value = relation(op, inherit.value, term.value) ? 1 : 0;
+        expr.isConst = inherit.isConst && term.isConst;
         switch (op.kind ) {
           case tMAYOR:
             gen.gt();
@@ -1459,11 +1427,196 @@ Constexpr relacion_(Constexpr inherit) :
         }
       }
     }
-    | {} {constexpr = inherit;}
+    exp = expresion_bool_(expr)
+    | {} {exp = inherit;}
   } catch (ParseException e) {
-    recoverParsingError("relacion_", e);
+    recoverParsingError("expresion_bool_", e);
   }
-  {return constexpr;}
+  {return exp;}
+}
+
+Expr expresion_bool_simple_(Expr inherit) :
+{
+  Expr expr = new Expr();
+  expr.type = Symbol.VariableType.BOOL;
+  Expr term = new Expr();
+  Expr exp = new Expr();
+  exp.type = Symbol.VariableType.BOOL;
+  Token op;
+}
+
+{
+  try {
+    op = <tOR> {genExpDrf(inherit);}
+    term = term_bool()
+    {
+      if (checkTypesOfBinaryOperator(inherit, term, Symbol.VariableType.BOOL, op)) {
+        expr.isConst = inherit.isConst && term.isConst;
+        expr.value = (inherit.value != 0) || (exp.value != 0) ? 1 : 0;
+        genExpDrf(term);
+        gen.or();
+      }
+    }
+    exp = expresion_bool_simple_(expr)
+    | {} {exp = inherit;}
+  } catch (ParseException e) {
+    recoverParsingError("expresion_bool_simple_", e);
+  }
+  {return exp;}
+}
+
+
+Expr term_bool_(Expr inherit) :
+{
+  Expr expr = new Expr();
+  expr.type = Symbol.VariableType.BOOL;
+  Expr factor = new Expr();
+  Expr term = new Expr();
+  term.type = Symbol.VariableType.BOOL;
+  Token op;
+}
+
+{
+  try {
+    op = <tAND> {genExpDrf(inherit);}
+    factor = expresion_arit()
+    {
+      if (checkTypesOfBinaryOperator(inherit, factor, Symbol.VariableType.BOOL, op)) {
+        expr.isConst = inherit.isConst && factor.isConst;
+        expr.value = (inherit.value != 0) && (term.value != 0) ? 1 : 0;
+        genExpDrf(factor);
+        gen.and();
+      }
+    }
+    term = term_bool_(expr)
+    | {} {term = inherit;}
+  } catch (ParseException e) {
+    recoverParsingError("term_bool_", e);
+  }
+  {return term;}
+}
+
+Expr expresion_arit_(Expr inherit) :
+{
+  Expr expr = new Expr();
+  expr.type = Symbol.VariableType.INT;
+  Expr term = new Expr();
+  Expr exp = new Expr();
+  exp.type = Symbol.VariableType.INT;
+  Token op;
+}
+
+{
+  try {
+    op = <tMAS> {genExpDrf(inherit);}
+    term = term_arit()
+    {
+      if (checkTypesOfBinaryOperator(inherit, term, Symbol.VariableType.INT, op)) {
+        expr.isConst = inherit.isConst && term.isConst;
+        expr.value = inherit.value + term.value;
+        genExpDrf(term);
+        gen.plus();
+      }
+    }
+    exp = expresion_arit_(expr)
+    | op = <tMENOS> {genExpDrf(inherit);}
+    term = term_arit()
+    {
+      if (checkTypesOfBinaryOperator(inherit, term, Symbol.VariableType.INT, op)) {
+        expr.isConst = inherit.isConst && term.isConst;
+        expr.value = inherit.value - term.value;
+        genExpDrf(term);
+        gen.sbt();
+      }
+    }
+    exp = expresion_arit_(expr)
+    | {} {exp = inherit;}
+  } catch (ParseException e) {
+    recoverParsingError("expresion_arit_", e);
+  }
+  {
+    return exp;
+  }
+}
+
+Expr term_arit_(Expr inherit) :
+{
+    Expr expr = new Expr();
+    expr.type = Symbol.VariableType.INT;
+    Expr factor = new Expr();
+    Expr term = new Expr();
+    term.type = Symbol.VariableType.INT;
+    Token op = null;
+}
+
+{
+  try {
+    op = <tMUL> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {
+      if (checkTypesOfBinaryOperator(inherit, factor, Symbol.VariableType.INT, op)) {
+        expr.isConst = (inherit.isConst && inherit.value == 0) ||
+            (factor.isConst && factor.value == 0) ||
+            (inherit.isConst && factor.isConst);
+        expr.value = inherit.value * factor.value;
+        genExpDrf(factor);
+        gen.tms();
+      }
+    }
+    term = term_arit_(expr)
+    | (op = <tDIV> | op = <tDIVCHAR>) {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {
+      if (checkTypesOfBinaryOperator(inherit, factor, Symbol.VariableType.INT, op)) {
+        if (checkDivByZero(factor, op)) {
+          expr.isConst = (inherit.isConst && inherit.value == 0) ||
+              (inherit.isConst && factor.isConst);
+          expr.value = inherit.value / factor.value;
+          genExpDrf(factor);
+          gen.div();
+        }
+      }
+    }
+    term = term_arit_(expr)
+    | op = <tMOD> {genExpDrf(inherit);}
+    factor = factor_arit_unario()
+    {
+      if (checkTypesOfBinaryOperator(inherit, factor, Symbol.VariableType.INT, op)) {
+        if (checkModuloZero(factor, op)) {
+          expr.isConst = (inherit.isConst && inherit.value == 0) ||
+              (inherit.isConst && factor.isConst);
+          expr.value = inherit.value % factor.value;
+          genExpDrf(factor);
+          gen.mod();
+        }
+      }
+    }
+    term = term_arit_(factor)
+    | {} {term = inherit;}
+  } catch (ParseException e) {
+    recoverParsingError("term_arit_", e);
+  }
+  {
+    return term;
+  }
+}
+
+void seleccion_(IntWrapper freeAddress) :
+{
+  Expr expr;
+}
+{
+  try {
+    expr = expresion_bool()
+    {
+      genExpDrf(expr);
+      String labelFalse = gen.newLabel();
+      gen.jmf(labelFalse);
+    }
+    seleccion__(labelFalse, freeAddress)
+  } catch (ParseException e) {
+    recoverParsingError("seleccion_", e);
+  }
 }
 
 void seleccion__(String labelFalse, IntWrapper freeAddress) :
