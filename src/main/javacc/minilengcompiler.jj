@@ -631,12 +631,22 @@ void declaracion_acciones() :
 void declaracion_accion() :
 {
   IntWrapper addr = new IntWrapper();
+  String l;
 }
 
 {
   try {
-    cabecera_accion(addr) <tPUNTOCOMA> declaracion_variables(addr)
-    declaracion_acciones() bloque_sentencias(addr)
+    cabecera_accion(addr)
+    {
+      l = gen.newLabel();
+      gen.jmp(l);
+    }
+    <tPUNTOCOMA> declaracion_variables(addr)
+    declaracion_acciones()
+    {
+      gen.insertLabel(l);
+    }
+    bloque_sentencias(addr)
     {
       gen.csf();
       SymbolTable.getInstance().closeScope();
